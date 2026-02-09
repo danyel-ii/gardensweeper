@@ -183,14 +183,14 @@ Acceptance:
 
 ## Milestone 8 — HUD styles + layout polish (optional)
 
-- [ ] Implement HUD style switcher:
+- [x] Implement HUD style switcher:
   - minimal
   - “brass counter” style
   - “field notes” style
-- [ ] Add a help/controls modal.
-- [ ] Add stats modal:
+- [x] Add a help/controls modal.
+- [x] Add stats modal:
   - best times per difficulty stored locally
-- [ ] Make layout responsive:
+- [x] Make layout responsive:
   - works well on mobile portrait
   - settings accessible without covering key UI
 

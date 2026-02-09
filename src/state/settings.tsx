@@ -376,6 +376,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     root.dataset.grain = settings.grainEnabled ? 'on' : 'off'
     root.dataset.vignette = settings.vignetteEnabled ? 'on' : 'off'
     root.dataset.boardFrame = settings.boardFrameEnabled ? 'on' : 'off'
+    root.dataset.hudStyle = settings.hudStyle
     root.dataset.numberStyle = settings.numberStyle
     root.dataset.glyphMode = settings.glyphModeEnabled ? 'on' : 'off'
     root.dataset.pressFeedback =

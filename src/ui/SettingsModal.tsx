@@ -321,6 +321,29 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
       </div>
 
       <div className="settingsSection">
+        <h3 className="settingsH3">HUD</h3>
+        <div className="settingsRow">
+          <label className="settingsLabel">
+            HUD style
+            <select
+              className="select"
+              value={settings.hudStyle}
+              onChange={(e) =>
+                setSettings((s) => ({
+                  ...s,
+                  hudStyle: e.target.value as typeof s.hudStyle,
+                }))
+              }
+            >
+              <option value="minimal">Minimal</option>
+              <option value="brass">Brass counter</option>
+              <option value="field-notes">Field notes</option>
+            </select>
+          </label>
+        </div>
+      </div>
+
+      <div className="settingsSection">
         <h3 className="settingsH3">Motion</h3>
         <div className="settingsRow">
           <label className="settingsLabel">

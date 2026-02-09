@@ -406,6 +406,55 @@ a:hover {
   gap: 8px;
 }
 
+:root[data-hud-style='brass'] .hudStat {
+  background: linear-gradient(
+    180deg,
+    rgba(251, 191, 36, 0.12),
+    rgba(0, 0, 0, 0.18)
+  );
+  border-color: rgba(251, 191, 36, 0.28);
+}
+
+:root[data-hud-style='brass'] .hudStatValue {
+  color: rgba(251, 191, 36, 0.92);
+  text-shadow: 0 0 14px rgba(251, 191, 36, 0.22);
+}
+
+:root[data-hud-style='brass'] .hud .btn {
+  border-color: rgba(251, 191, 36, 0.28);
+  background: linear-gradient(
+    180deg,
+    rgba(251, 191, 36, 0.12),
+    rgba(255, 255, 255, 0.06)
+  );
+}
+
+:root[data-hud-style='brass'] .hudDifficulty {
+  color: rgba(251, 191, 36, 0.74);
+}
+
+:root[data-hud-style='field-notes'] .hudStat {
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.06),
+    rgba(255, 255, 255, 0.02)
+  );
+  border-style: dashed;
+}
+
+:root[data-hud-style='field-notes'] .hudStatLabel {
+  letter-spacing: 0.18em;
+}
+
+:root[data-hud-style='field-notes'] .hud .btn {
+  background: transparent;
+  border-style: dashed;
+}
+
+:root[data-hud-style='field-notes'] .hudDifficulty {
+  opacity: 0.92;
+}
+
 .boardWrap {
   overflow: auto;
   padding: 6px 2px 2px;
@@ -684,6 +733,70 @@ a:hover {
   color: var(--text0);
 }
 
+.helpModalGrid {
+  display: grid;
+  gap: 14px;
+}
+
+.helpBlock {
+  border: 1px solid var(--lineSubtle);
+  background: var(--surface);
+  border-radius: 14px;
+  padding: 12px;
+}
+
+.helpH3 {
+  margin: 0 0 10px;
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--titleSoft);
+}
+
+.helpUl {
+  margin: 0;
+  padding-left: 18px;
+  color: var(--text1);
+  display: grid;
+  gap: 8px;
+}
+
+.helpP {
+  margin: 0;
+  color: var(--text1);
+  line-height: 1.5;
+}
+
+.statsGrid {
+  display: grid;
+  gap: 10px;
+}
+
+.statsRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  border: 1px solid var(--lineSubtle);
+  background: var(--surface);
+  border-radius: 14px;
+  padding: 12px;
+}
+
+.statsLabel {
+  color: var(--text1);
+}
+
+.statsValue {
+  color: var(--text0);
+  font-weight: 700;
+}
+
+.statsNote {
+  margin: 12px 0 0;
+  color: var(--text1);
+}
+
 .mono {
   font-family: var(--mono);
 }
@@ -705,6 +818,8 @@ a:hover {
   background: var(--modalBg);
   box-shadow: var(--shadowModal);
   backdrop-filter: blur(10px);
+  max-height: calc(100dvh - 36px);
+  overflow: auto;
 }
 
 .modalHeader {

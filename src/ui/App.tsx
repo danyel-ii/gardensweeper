@@ -7,9 +7,12 @@ import { PRESETS, type DifficultyId } from '../state/presets'
 import { randomSeed } from '../utils/seed'
 import { Board } from './Board'
 import { CustomGameModal } from './CustomGameModal'
+import { HelpModal } from './HelpModal'
 import { Hud } from './Hud'
 import { Modal } from './Modal'
 import { SettingsModal } from './SettingsModal'
+import { StatsModal } from './StatsModal'
+import { loadStats, recordWin, saveStats, type DifficultyKey } from '../state/stats'
 
 function nowMs(): number {
   return Date.now()
@@ -45,6 +48,9 @@ export default function App() {
   const [tMs, setTMs] = useState(() => nowMs())
   const [customOpen, setCustomOpen] = useState(false)
   const [settingsOpen, setSettingsOpen] = useState(false)
+  const [helpOpen, setHelpOpen] = useState(false)
+  const [statsOpen, setStatsOpen] = useState(false)
+  const [stats, setStats] = useState(() => loadStats())
   const [revealOrigin, setRevealOrigin] = useState<{ x: number; y: number } | null>(
     null,
   )
@@ -57,6 +63,17 @@ export default function App() {
   const minesRemaining = game.config.mineCount - game.flagsCount
   const elapsedSeconds = computeElapsedSeconds(game, tMs)
   const tileSizePx = computeTileSizePx(game.config.width)
+
+  useEffect(() => {
+    saveStats(stats)
+  }, [stats])
+
+  useEffect(() => {
+    if (game.status !== 'won') return
+    if (difficulty === 'custom') return
+    const key = difficulty as DifficultyKey
+    setStats((s) => recordWin(s, key, elapsedSeconds))
+  }, [game.status, game.config.seed, difficulty, elapsedSeconds])
 
   // Timer ticker: only while game is active and started.
   useEffect(() => {
@@ -144,6 +161,20 @@ export default function App() {
               >
                 Settings
               </button>
+              <button
+                className="btn btnGhost"
+                type="button"
+                onClick={() => setHelpOpen(true)}
+              >
+                Help
+              </button>
+              <button
+                className="btn btnGhost"
+                type="button"
+                onClick={() => setStatsOpen(true)}
+              >
+                Stats
+              </button>
             </div>
           </div>
         </div>
@@ -230,6 +261,13 @@ export default function App() {
       />
 
       <SettingsModal open={settingsOpen} onClose={() => setSettingsOpen(false)} />
+      <HelpModal open={helpOpen} onClose={() => setHelpOpen(false)} />
+      <StatsModal
+        open={statsOpen}
+        stats={stats}
+        onChangeStats={setStats}
+        onClose={() => setStatsOpen(false)}
+      />
 
       <Modal
         open={game.status === 'won'}
