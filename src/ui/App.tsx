@@ -1,30 +1,20 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 
 import type { BoardSpec } from '../engine/board'
-import { revealCell } from '../engine/game'
-import { chord, createNewGame, toggleFlag, type GameState } from '../engine/game'
+import { chord, createNewGame, revealCell, toggleFlag, type GameState } from '../engine/game'
 import { indexToX, indexToY } from '../engine/grid'
-import { PRESETS, type DifficultyId } from '../state/presets'
-import { DEFAULT_SETTINGS, useSettings } from '../state/settings'
-import { loadStats, recordWin, saveStats, type DifficultyKey } from '../state/stats'
 import { randomSeed } from '../utils/seed'
-import {
-  buildUrl,
-  decodeVisualPreset,
-  encodeVisualPreset,
-  parseUrlParams,
-} from '../utils/urlState'
+import { buildUrl, parseUrlParams } from '../utils/urlState'
 import { Board } from './Board'
-import { CustomGameModal } from './CustomGameModal'
-import { HelpModal } from './HelpModal'
-import { Hud } from './Hud'
 import { Modal } from './Modal'
-import { SettingsModal } from './SettingsModal'
-import { StatsModal } from './StatsModal'
-import { useAudio } from './useAudio'
 
 function nowMs(): number {
   return Date.now()
+}
+
+function pad3(n: number): string {
+  const clamped = Math.max(0, Math.min(999, Math.floor(n)))
+  return clamped.toString().padStart(3, '0')
 }
 
 function computeElapsedSeconds(game: GameState, tMs: number): number {
@@ -33,168 +23,59 @@ function computeElapsedSeconds(game: GameState, tMs: number): number {
   return Math.max(0, Math.floor((end - game.startMs) / 1000))
 }
 
-function bestDifficultyLabel(difficulty: DifficultyId, spec: BoardSpec): string {
-  const preset = PRESETS.find((p) => p.id === difficulty)
-  if (preset) return preset.label
-  return `Custom ${spec.width}x${spec.height} (${spec.mineCount})`
-}
-
-function difficultyFromSpec(spec: BoardSpec): DifficultyId {
-  const match = PRESETS.find(
-    (p) =>
-      p.spec.width === spec.width &&
-      p.spec.height === spec.height &&
-      p.spec.mineCount === spec.mineCount,
-  )
-  return match?.id ?? 'custom'
-}
-
 function computeTileSizePx(width: number): number {
-  // Keep it simple for now: scale down for larger boards, but stay tappable.
-  if (width >= 30) return 20
-  if (width >= 20) return 24
-  return 28
+  // Tuned for a playful, "sticker" look while staying usable on mobile.
+  if (width >= 30) return 18
+  if (width >= 24) return 20
+  if (width >= 20) return 22
+  if (width >= 16) return 26
+  if (width >= 10) return 30
+  return 34
 }
+
+const DEFAULT_SPEC: BoardSpec = { width: 10, height: 10, mineCount: 12 }
 
 export default function App() {
-  const { settings, setSettings } = useSettings()
-  const { playSfx, haptic } = useAudio(settings)
-  const prevGameRef = useRef<GameState | null>(null)
-  const prevMuteRef = useRef<{ sfxEnabled: boolean; ambienceEnabled: boolean } | null>(
-    null,
-  )
-
   const [boot] = useState(() => {
-    const parsed = parseUrlParams(window.location.search)
-    const keepVisualPresetInUrl = Boolean(parsed.visual?.preset)
-    const fromUrl = parsed.game
+    const fromUrl = parseUrlParams(window.location.search)
     if (fromUrl) {
       try {
-        const spec: BoardSpec = fromUrl.spec
-        const difficulty = difficultyFromSpec(spec)
-        let game = createNewGame({ ...spec, seed: fromUrl.seed.trim() })
+        let game = createNewGame({ ...fromUrl.spec, seed: fromUrl.seed })
         if (fromUrl.start) {
           game = revealCell(game, fromUrl.start.x, fromUrl.start.y).state
         }
-        return {
-          spec,
-          difficulty,
-          game,
-          seedDraft: fromUrl.seed.trim(),
-          keepVisualPresetInUrl,
-        }
+        return { spec: fromUrl.spec, game, seedDraft: fromUrl.seed }
       } catch {
         // fall through to defaults
       }
     }
 
-    const spec = PRESETS[0]!.spec
-    const seedDraft = randomSeed()
-    const game = createNewGame({ ...spec, seed: seedDraft })
-    return {
-      spec,
-      difficulty: 'beginner' as DifficultyId,
-      game,
-      seedDraft,
-      keepVisualPresetInUrl,
-    }
+    const seed = randomSeed()
+    const game = createNewGame({ ...DEFAULT_SPEC, seed })
+    return { spec: DEFAULT_SPEC, game, seedDraft: seed }
   })
 
-  const [difficulty, setDifficulty] = useState<DifficultyId>(() => boot.difficulty)
   const [spec, setSpec] = useState<BoardSpec>(() => boot.spec)
   const [game, setGame] = useState<GameState>(() => boot.game)
   const [seedDraft, setSeedDraft] = useState(() => boot.seedDraft)
-  const keepVisualPresetInUrl = boot.keepVisualPresetInUrl
-
-  const [tMs, setTMs] = useState(() => nowMs())
-  const [customOpen, setCustomOpen] = useState(false)
-  const [settingsOpen, setSettingsOpen] = useState(false)
-  const [helpOpen, setHelpOpen] = useState(false)
-  const [statsOpen, setStatsOpen] = useState(false)
-  const [stats, setStats] = useState(() => loadStats())
   const [copied, setCopied] = useState(false)
-  const [revealOrigin, setRevealOrigin] = useState<{ x: number; y: number } | null>(
-    null,
-  )
-
-  const difficultyLabel = useMemo(
-    () => bestDifficultyLabel(difficulty, spec),
-    [difficulty, spec],
-  )
+  const [tMs, setTMs] = useState(() => nowMs())
 
   const minesRemaining = game.config.mineCount - game.flagsCount
   const elapsedSeconds = computeElapsedSeconds(game, tMs)
   const tileSizePx = computeTileSizePx(game.config.width)
   const canCopyLink = game.generated && game.firstClickIndex != null
 
-  const beginNewGame = useCallback(
-    (nextSpec: BoardSpec, nextDifficulty: DifficultyId, nextSeed: string) => {
-      const seed = nextSeed.trim()
-      if (seed.length === 0) return
-      setDifficulty(nextDifficulty)
-      setSpec(nextSpec)
-      setSeedDraft(seed)
-      setRevealOrigin(null)
-      setCopied(false)
-      setGame(createNewGame({ ...nextSpec, seed }))
-    },
-    [setCopied, setDifficulty, setGame, setRevealOrigin, setSeedDraft, setSpec],
-  )
+  const beginNewGame = useCallback((nextSpec: BoardSpec, nextSeed: string) => {
+    const seed = nextSeed.trim()
+    if (seed.length === 0) return
+    setSpec(nextSpec)
+    setSeedDraft(seed)
+    setCopied(false)
+    setGame(createNewGame({ ...nextSpec, seed }))
+  }, [])
 
-  useEffect(() => {
-    const prev = prevGameRef.current
-    prevGameRef.current = game
-    if (!prev) return
-
-    const sameGame =
-      prev.config.seed === game.config.seed &&
-      prev.config.width === game.config.width &&
-      prev.config.height === game.config.height &&
-      prev.config.mineCount === game.config.mineCount
-    if (!sameGame) return
-
-    if (prev.status === 'playing' && game.status === 'won') {
-      playSfx('win')
-      haptic('win')
-      return
-    }
-    if (prev.status === 'playing' && game.status === 'lost') {
-      playSfx('lose')
-      haptic('lose')
-      return
-    }
-
-    if (game.flagsCount > prev.flagsCount) {
-      playSfx('flag')
-      haptic('flag')
-      return
-    }
-    if (game.revealedCount > prev.revealedCount) {
-      playSfx('reveal')
-      haptic('reveal')
-    }
-  }, [game, playSfx, haptic])
-
-  useEffect(() => {
-    saveStats(stats)
-  }, [stats])
-
-  useEffect(() => {
-    const parsed = parseUrlParams(window.location.search)
-    const visual = parsed.visual
-    if (!visual) return
-
-    setSettings((prev) => {
-      let next = prev
-      if (visual.preset) {
-        const partial = decodeVisualPreset(visual.preset)
-        if (partial) next = { ...DEFAULT_SETTINGS, ...partial }
-      }
-      if (visual.themePackId) next = { ...next, themePackId: visual.themePackId }
-      return next
-    })
-  }, [setSettings])
-
+  // Sync URL to reflect the current "challenge". Adds sx/sy only after first reveal.
   useEffect(() => {
     const start =
       game.generated && game.firstClickIndex != null
@@ -212,10 +93,7 @@ export default function App() {
       },
       seed: game.config.seed,
       start,
-      themePackId: settings.themePackId,
-      preset: keepVisualPresetInUrl ? encodeVisualPreset(settings) : undefined,
     })
-
     history.replaceState(null, '', href)
   }, [
     game.config.width,
@@ -224,8 +102,6 @@ export default function App() {
     game.config.seed,
     game.generated,
     game.firstClickIndex,
-    settings,
-    keepVisualPresetInUrl,
   ])
 
   // Timer ticker: only while game is active and started.
@@ -237,7 +113,7 @@ export default function App() {
     return () => window.clearInterval(id)
   }, [game.status, game.startMs, game.endMs])
 
-  // Global keyboard shortcuts.
+  // Global keyboard shortcut: R = restart with a new seed.
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       const target = e.target as HTMLElement | null
@@ -248,376 +124,247 @@ export default function App() {
           target.isContentEditable)
       if (typing) return
 
-      if (e.key === 'm' || e.key === 'M') {
-        e.preventDefault()
-        setSettings((s) => {
-          const muted = !s.sfxEnabled && !s.ambienceEnabled
-          if (!muted) {
-            prevMuteRef.current = {
-              sfxEnabled: s.sfxEnabled,
-              ambienceEnabled: s.ambienceEnabled,
-            }
-            return { ...s, sfxEnabled: false, ambienceEnabled: false }
-          }
-          const prevAudio = prevMuteRef.current
-          prevMuteRef.current = null
-          return {
-            ...s,
-            sfxEnabled: prevAudio?.sfxEnabled ?? true,
-            ambienceEnabled: prevAudio?.ambienceEnabled ?? false,
-          }
-        })
-        return
-      }
-
       if (e.key === 'r' || e.key === 'R') {
         e.preventDefault()
-        beginNewGame(spec, difficulty, randomSeed())
-        return
-      }
-      if (e.key === '1') {
-        e.preventDefault()
-        const p = PRESETS.find((x) => x.id === 'beginner')!
-        beginNewGame(p.spec, 'beginner', randomSeed())
-        return
-      }
-      if (e.key === '2') {
-        e.preventDefault()
-        const p = PRESETS.find((x) => x.id === 'intermediate')!
-        beginNewGame(p.spec, 'intermediate', randomSeed())
-        return
-      }
-      if (e.key === '3') {
-        e.preventDefault()
-        const p = PRESETS.find((x) => x.id === 'expert')!
-        beginNewGame(p.spec, 'expert', randomSeed())
+        beginNewGame(spec, randomSeed())
       }
     }
 
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
-  }, [beginNewGame, difficulty, spec, setSettings])
+  }, [beginNewGame, spec])
 
-  const handleReveal = useCallback(
-    (x: number, y: number) => {
-      const t = nowMs()
-      setRevealOrigin({ x, y })
-      setGame((g) => {
-        const next = revealCell(g, x, y, t).state
-        if (g.status === 'playing' && next.status === 'won' && difficulty !== 'custom') {
-          const key = difficulty as DifficultyKey
-          setStats((s) => recordWin(s, key, computeElapsedSeconds(next, t)))
-        }
-        return next
-      })
-    },
-    [difficulty],
-  )
-
-  const handleFlag = useCallback((x: number, y: number) => {
-    setGame((g) => toggleFlag(g, x, y, nowMs()))
+  const handleReveal = useCallback((x: number, y: number) => {
+    const t = nowMs()
+    setGame((g) => revealCell(g, x, y, t).state)
   }, [])
 
-  const handleChord = useCallback(
-    (x: number, y: number) => {
-      const t = nowMs()
-      setRevealOrigin({ x, y })
-      setGame((g) => {
-        const next = chord(g, x, y, t)
-        if (g.status === 'playing' && next.status === 'won' && difficulty !== 'custom') {
-          const key = difficulty as DifficultyKey
-          setStats((s) => recordWin(s, key, computeElapsedSeconds(next, t)))
-        }
-        return next
-      })
-    },
-    [difficulty],
-  )
+  const handleFlag = useCallback((x: number, y: number) => {
+    const t = nowMs()
+    setGame((g) => toggleFlag(g, x, y, t))
+  }, [])
+
+  const handleChord = useCallback((x: number, y: number) => {
+    const t = nowMs()
+    setGame((g) => chord(g, x, y, t))
+  }, [])
+
+  const difficultyLabel = useMemo(() => {
+    return `${game.config.width}×${game.config.height} / ${game.config.mineCount}`
+  }, [game.config.width, game.config.height, game.config.mineCount])
 
   return (
-    <div className="app" data-app data-game-status={game.status}>
-      <header className="appHeader">
-        <div className="appHeaderInner">
-          <div className="titleRow">
-            <div>
-              <h1 className="appTitle">Minesweeper Studio</h1>
-              <p className="appSubtitle">
-                Classic Minesweeper, plus optional "studio" settings for themes, texture,
-                motion, HUD, cursor, and sound.
-              </p>
+    <div className="app" data-game-status={game.status}>
+      <div className="textureOverlay" aria-hidden="true" />
+
+      <div className="bgSticker stickerTL" aria-hidden="true">
+        <svg viewBox="0 0 100 100" role="presentation">
+          <path
+            d="M50 50 Q70 10 90 50 T50 90 T10 50 T50 10"
+            fill="var(--ref-pink)"
+            stroke="white"
+            strokeWidth="3"
+          />
+          <circle cx="50" cy="50" r="10" fill="var(--ref-gold)" />
+        </svg>
+      </div>
+
+      <div className="bgSticker stickerBR" aria-hidden="true">
+        <svg viewBox="0 0 100 100" role="presentation">
+          <circle
+            cx="50"
+            cy="50"
+            r="45"
+            fill="var(--ref-lime)"
+            stroke="white"
+            strokeWidth="3"
+          />
+          <circle cx="50" cy="50" r="40" fill="#fff" opacity="0.28" />
+          <path d="M50 50 L50 10" stroke="white" strokeWidth="2" />
+          <path d="M50 50 L90 50" stroke="white" strokeWidth="2" />
+          <path d="M50 50 L50 90" stroke="white" strokeWidth="2" />
+          <path d="M50 50 L10 50" stroke="white" strokeWidth="2" />
+          <path d="M50 50 L22 22" stroke="white" strokeWidth="2" />
+          <path d="M50 50 L78 22" stroke="white" strokeWidth="2" />
+          <path d="M50 50 L78 78" stroke="white" strokeWidth="2" />
+          <path d="M50 50 L22 78" stroke="white" strokeWidth="2" />
+        </svg>
+      </div>
+
+      <div className="bgSticker stickerTR" aria-hidden="true">
+        <svg viewBox="0 0 100 100" role="presentation">
+          <polygon
+            points="50,5 61,35 95,35 68,57 79,91 50,70 21,91 32,57 5,35 39,35"
+            fill="var(--ref-papaya)"
+            stroke="white"
+            strokeWidth="3"
+            strokeLinejoin="round"
+          />
+        </svg>
+      </div>
+
+      <div className="bgSticker stickerBL" aria-hidden="true">
+        <svg viewBox="0 0 100 100" role="presentation">
+          <path
+            d="M50 90 Q10 60 10 30 Q10 10 50 10 Q90 10 90 30 Q90 60 50 90"
+            fill="var(--ref-teal)"
+            stroke="white"
+            strokeWidth="3"
+          />
+          <path d="M50 15 L50 85" stroke="#fff" strokeWidth="2" opacity="0.5" />
+        </svg>
+      </div>
+
+      <div className="gameWrapper">
+        <header className="gardenHeader" aria-label="Game header">
+          <div className="hudPanel" aria-label="Mines remaining">
+            <div className="hudItem">
+              <span className="icon" aria-hidden="true">
+                🌵
+              </span>
+              <span className="hudValue">{pad3(minesRemaining)}</span>
             </div>
-            <div className="headerMeta">
-              <span className="metaPill">{difficultyLabel}</span>
-              <button
-                className="btn btnGhost"
-                type="button"
-                onClick={() => setSettingsOpen(true)}
-              >
-                Settings
-              </button>
-              <button
-                className="btn btnGhost"
-                type="button"
-                onClick={() => setHelpOpen(true)}
-              >
-                Help
-              </button>
-              <button
-                className="btn btnGhost"
-                type="button"
-                onClick={() => setStatsOpen(true)}
-              >
-                Stats
-              </button>
+          </div>
+
+          <div className="titleBlock">
+            <h1 className="gardenTitle">Garden Sweeper</h1>
+            <div className="gardenSub">{difficultyLabel}</div>
+          </div>
+
+          <div className="hudPanel" aria-label="Timer">
+            <div className="hudItem">
+              <span className="icon" aria-hidden="true">
+                ⏱️
+              </span>
+              <span className="hudValue">{pad3(elapsedSeconds)}</span>
             </div>
+          </div>
+        </header>
+
+        <div className="seedRow" aria-label="Seed and sharing">
+          <label className="seedLabel">
+            <span className="seedLabelText">Seed</span>
+            <input
+              className="seedInput"
+              value={seedDraft}
+              onChange={(e) => setSeedDraft(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key !== 'Enter') return
+                beginNewGame(spec, seedDraft)
+              }}
+            />
+          </label>
+
+          <div className="seedButtons">
+            <button
+              className="seedBtn"
+              type="button"
+              onClick={() => beginNewGame(spec, randomSeed())}
+            >
+              New seed
+            </button>
+            <button
+              className="seedBtn seedBtnPrimary"
+              type="button"
+              disabled={!canCopyLink}
+              onClick={async () => {
+                if (!canCopyLink) return
+                const start = {
+                  x: indexToX(game.config.width, game.firstClickIndex!),
+                  y: indexToY(game.config.width, game.firstClickIndex!),
+                }
+                const href = buildUrl(window.location.href, {
+                  spec: {
+                    width: game.config.width,
+                    height: game.config.height,
+                    mineCount: game.config.mineCount,
+                  },
+                  seed: game.config.seed,
+                  start,
+                })
+
+                try {
+                  await navigator.clipboard.writeText(href)
+                  setCopied(true)
+                  window.setTimeout(() => setCopied(false), 1400)
+                } catch {
+                  // Fallback for older browsers.
+                  const ta = document.createElement('textarea')
+                  ta.value = href
+                  ta.style.position = 'fixed'
+                  ta.style.left = '-9999px'
+                  document.body.appendChild(ta)
+                  ta.select()
+                  document.execCommand('copy')
+                  document.body.removeChild(ta)
+                  setCopied(true)
+                  window.setTimeout(() => setCopied(false), 1400)
+                }
+              }}
+            >
+              Copy link
+            </button>
+          </div>
+
+          <div className="seedHint" aria-live="polite">
+            {copied ? (
+              <span className="seedCopied">Copied.</span>
+            ) : canCopyLink ? (
+              <span>Share reproduces the exact board.</span>
+            ) : (
+              <span>Make a first move to generate a shareable board.</span>
+            )}
           </div>
         </div>
-      </header>
 
-      <main className="appMain appMainGame">
-        <section className="panel" aria-label="Game">
-          <Hud
-            minesRemaining={minesRemaining}
-            timeSeconds={elapsedSeconds}
-            difficultyLabel={difficultyLabel}
-            status={game.status}
-            onRestart={() => {
-              beginNewGame(spec, difficulty, randomSeed())
-            }}
-            onPreset={(id) => {
-              const p = PRESETS.find((x) => x.id === id)!
-              beginNewGame(p.spec, id, randomSeed())
-            }}
-            onOpenCustom={() => setCustomOpen(true)}
-          />
+        <Board
+          key={`${game.config.width}x${game.config.height}:${game.config.mineCount}:${game.config.seed}`}
+          game={game}
+          tileSizePx={tileSizePx}
+          onReveal={handleReveal}
+          onFlag={handleFlag}
+          onChord={handleChord}
+        />
 
-          <div className="seedBar" aria-label="Seed and sharing">
-            <label className="seedLabel">
-              <span className="seedLabelText">Seed</span>
-              <input
-                className="input seedInput"
-                value={seedDraft}
-                onChange={(e) => setSeedDraft(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key !== 'Enter') return
-                  const nextSeed = seedDraft.trim()
-                  if (!nextSeed) return
-                  beginNewGame(spec, difficulty, nextSeed)
-                }}
-              />
-            </label>
-            <div className="seedButtons">
-              <button
-                className="btn btnGhost"
-                type="button"
-                onClick={() => {
-                  beginNewGame(spec, difficulty, randomSeed())
-                }}
-              >
-                New seed
-              </button>
-              <button
-                className="btn btnGhost"
-                type="button"
-                disabled={seedDraft.trim().length === 0 || seedDraft.trim() === game.config.seed}
-                onClick={() => {
-                  const nextSeed = seedDraft.trim()
-                  if (!nextSeed) return
-                  beginNewGame(spec, difficulty, nextSeed)
-                }}
-              >
-                Set seed
-              </button>
-              <button
-                className="btn"
-                type="button"
-                disabled={!canCopyLink}
-                onClick={async () => {
-                  if (!canCopyLink) return
-                  const start = {
-                    x: indexToX(game.config.width, game.firstClickIndex!),
-                    y: indexToY(game.config.width, game.firstClickIndex!),
-                  }
-                  const href = buildUrl(window.location.href, {
-                    spec: {
-                      width: game.config.width,
-                      height: game.config.height,
-                      mineCount: game.config.mineCount,
-                    },
-                    seed: game.config.seed,
-                    start,
-                    themePackId: settings.themePackId,
-                    preset: encodeVisualPreset(settings),
-                  })
-
-                  try {
-                    await navigator.clipboard.writeText(href)
-                    setCopied(true)
-                    window.setTimeout(() => setCopied(false), 1400)
-                  } catch {
-                    // Fallback for older browsers.
-                    const ta = document.createElement('textarea')
-                    ta.value = href
-                    ta.style.position = 'fixed'
-                    ta.style.left = '-9999px'
-                    document.body.appendChild(ta)
-                    ta.select()
-                    document.execCommand('copy')
-                    document.body.removeChild(ta)
-                    setCopied(true)
-                    window.setTimeout(() => setCopied(false), 1400)
-                  }
-                }}
-              >
-                Copy link
-              </button>
-            </div>
-            <div className="seedHint">
-              {copied ? (
-                <span className="seedCopied">Copied.</span>
-              ) : canCopyLink ? (
-                <span>Share reproduces board + visuals.</span>
-              ) : (
-                <span>Start a game (first reveal) to generate a shareable board.</span>
-              )}
-            </div>
-          </div>
-
-          <Board
-            key={`${game.config.width}x${game.config.height}:${game.config.mineCount}:${game.config.seed}`}
-            game={game}
-            tileSizePx={tileSizePx}
-            revealOrigin={revealOrigin}
-            onReveal={handleReveal}
-            onFlag={handleFlag}
-            onChord={handleChord}
-          />
-        </section>
-
-        <section className="panel sidePanel" aria-label="Info">
-          <h2 className="panelTitle">Controls</h2>
-          <div className="helpList">
-            <div>
-              <span className="helpKey">Left click</span> reveal
-            </div>
-            <div>
-              <span className="helpKey">Right click</span> flag
-            </div>
-            <div>
-              <span className="helpKey">Middle click</span> chord
-            </div>
-            <div>
-              <span className="helpKey">Shift + click</span> chord
-            </div>
-            <div>
-              <span className="helpKey">Arrows</span> move focus
-            </div>
-            <div>
-              <span className="helpKey">Enter</span> reveal focused tile
-            </div>
-            <div>
-              <span className="helpKey">F</span> flag focused tile
-            </div>
-            <div>
-              <span className="helpKey">Space</span> chord focused tile
-            </div>
-            <div>
-              <span className="helpKey">R</span> restart
-            </div>
-            <div>
-              <span className="helpKey">1 / 2 / 3</span> presets
-            </div>
-            <div>
-              <span className="helpKey">M</span> mute/unmute
-            </div>
-          </div>
-        </section>
-      </main>
-
-      <CustomGameModal
-        open={customOpen}
-        initialSpec={spec}
-        onClose={() => setCustomOpen(false)}
-        onStart={(nextSpec) => beginNewGame(nextSpec, 'custom', randomSeed())}
-      />
-
-      <SettingsModal open={settingsOpen} onClose={() => setSettingsOpen(false)} />
-      <HelpModal open={helpOpen} onClose={() => setHelpOpen(false)} />
-      <StatsModal
-        open={statsOpen}
-        stats={stats}
-        onChangeStats={setStats}
-        onClose={() => setStatsOpen(false)}
-      />
+        <div className="actionsRow">
+          <button
+            className="resetBtn"
+            type="button"
+            onClick={() => beginNewGame(spec, randomSeed())}
+          >
+            Plant New Garden
+          </button>
+        </div>
+      </div>
 
       <Modal
         open={game.status === 'won'}
-        title="You win"
-        onClose={() => {
-          beginNewGame(spec, difficulty, randomSeed())
-        }}
+        title="Garden Grown!"
+        onClose={() => beginNewGame(spec, randomSeed())}
         actions={
-          <>
-            <button
-              className="btn btnGhost"
-              onClick={() => {
-                beginNewGame(spec, difficulty, randomSeed())
-              }}
-            >
-              Close
-            </button>
-            <button
-              className="btn"
-              onClick={() => {
-                beginNewGame(spec, difficulty, randomSeed())
-              }}
-            >
-              New game
-            </button>
-          </>
+          <button className="seedBtn seedBtnPrimary" onClick={() => beginNewGame(spec, randomSeed())}>
+            Play again
+          </button>
         }
       >
         <p className="modalText">
-          Time: <span className="mono">{elapsedSeconds}s</span>
+          You cleared the garden in <span className="mono">{elapsedSeconds}s</span>.
         </p>
       </Modal>
 
       <Modal
         open={game.status === 'lost'}
-        title="Boom"
-        onClose={() => {
-          beginNewGame(spec, difficulty, randomSeed())
-        }}
+        title="Ouch!"
+        onClose={() => beginNewGame(spec, randomSeed())}
         actions={
-          <>
-            <button
-              className="btn btnGhost"
-              onClick={() => {
-                beginNewGame(spec, difficulty, randomSeed())
-              }}
-            >
-              Close
-            </button>
-            <button
-              className="btn"
-              onClick={() => {
-                beginNewGame(spec, difficulty, randomSeed())
-              }}
-            >
-              Restart
-            </button>
-          </>
+          <button className="seedBtn seedBtnPrimary" onClick={() => beginNewGame(spec, randomSeed())}>
+            Try again
+          </button>
         }
       >
-        <p className="modalText">Try again.</p>
+        <p className="modalText">You touched a prickly cactus.</p>
       </Modal>
-
-      <footer className="appFooter">
-        <small>
-          Seeded, shareable boards. Studio settings persist locally and honor
-          prefers-reduced-motion.
-        </small>
-      </footer>
     </div>
   )
 }
+

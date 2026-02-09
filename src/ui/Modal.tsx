@@ -36,7 +36,7 @@ export function Modal({ open, title, children, actions, onClose }: ModalProps) {
           <h2 className="modalTitle" id={titleId}>
             {title}
           </h2>
-          <button className="btn btnGhost" onClick={onClose} aria-label="Close">
+          <button className="seedBtn" onClick={onClose} aria-label="Close">
             Close
           </button>
         </div>

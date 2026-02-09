@@ -1,7 +1,5 @@
 import { memo, useRef, type CSSProperties, type ReactNode } from 'react'
 
-import { Glyph } from './Glyph'
-
 export type TileViewModel = {
   index: number
   x: number
@@ -13,14 +11,9 @@ export type TileViewModel = {
   disabled: boolean
   tabIndex: number
   tileSizePx: number
-  tvRotDeg: number
-  tvBright: number
-  revealDelayMs: number
-  glyphModeEnabled: boolean
-  chordPreview: boolean
+  rotDeg: number
   ariaLabel: string
   onFocusIndex: (index: number) => void
-  onHoverIndex: (index: number | null) => void
   onReveal: (x: number, y: number, opts?: { chord?: boolean }) => void
   onFlag: (x: number, y: number) => void
   onChord: (x: number, y: number) => void
@@ -39,14 +32,9 @@ function TileImpl(props: TileViewModel) {
     disabled,
     tabIndex,
     tileSizePx,
-    tvRotDeg,
-    tvBright,
-    revealDelayMs,
-    glyphModeEnabled,
-    chordPreview,
+    rotDeg,
     ariaLabel,
     onFocusIndex,
-    onHoverIndex,
     onReveal,
     onFlag,
     onChord,
@@ -58,12 +46,10 @@ function TileImpl(props: TileViewModel) {
 
   let content: ReactNode = ''
   if (revealed) {
-    if (mine) content = 'X'
-    else if (adjacent > 0) {
-      content = glyphModeEnabled ? <Glyph n={adjacent} /> : adjacent
-    }
+    if (mine) content = '🌵'
+    else if (adjacent > 0) content = adjacent
   } else if (flagged) {
-    content = 'F'
+    content = '🦋'
   }
 
   const classes = [
@@ -71,7 +57,6 @@ function TileImpl(props: TileViewModel) {
     revealed ? 'revealed' : 'hidden',
     mine && revealed ? 'mine' : '',
     flagged && !revealed ? 'flagged' : '',
-    chordPreview ? 'chordPreview' : '',
     revealed && !mine && adjacent > 0 ? `n${adjacent}` : '',
   ]
     .filter(Boolean)
@@ -86,20 +71,17 @@ function TileImpl(props: TileViewModel) {
         {
           width: tileSizePx,
           height: tileSizePx,
-          ['--tv-rot' as string]: `${tvRotDeg}deg`,
-          ['--tv-bright' as string]: tvBright,
-          ['--reveal-delay' as string]: `${revealDelayMs}ms`,
+          ['--tile-rot' as string]: `${revealed ? 0 : rotDeg}deg`,
         } as CSSProperties
       }
       disabled={disabled}
       tabIndex={tabIndex}
       aria-label={ariaLabel}
+      data-num={revealed && !mine && adjacent > 0 ? adjacent : undefined}
       onFocus={() => onFocusIndex(index)}
-      onMouseEnter={() => onHoverIndex(index)}
-      onMouseLeave={() => onHoverIndex(null)}
       onTouchStart={(e) => {
         if (disabled) return
-        // Two-finger tap chord gesture (discoverable via Help).
+        // Two-finger tap chord gesture.
         if (e.touches.length === 2) {
           e.preventDefault()
           suppressClickRef.current = true
@@ -163,3 +145,4 @@ function TileImpl(props: TileViewModel) {
 }
 
 export const Tile = memo(TileImpl)
+

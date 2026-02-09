@@ -1,8 +1,6 @@
-# Minesweeper Studio
+# Garden Sweeper
 
-Browser-based Minesweeper with a "beautification studio": every visual polish
-feature (themes, textures, typography, motion, HUD styles, cursor, ambience,
-etc.) is optional, reversible, and persisted.
+Slim browser-based Minesweeper with a playful garden theme.
 
 ## Run
 
@@ -32,8 +30,6 @@ npm run preview
   - Enter reveal focused tile
   - F flag focused tile
   - R restart
-  - 1 / 2 / 3 presets (Beginner / Intermediate / Expert)
-  - M mute/unmute
 
 ## Sharing (Seeds + URL)
 
@@ -43,22 +39,7 @@ include that starting coordinate and reproduce the exact same board.
 
 The URL encodes:
 - Game params: `w`, `h`, `m`, `seed`, and (after first reveal) `sx`, `sy`
-- Visuals: `theme` and optional `vp` (compact visual preset)
-
-## Settings Overview
-
-Settings are persisted in `localStorage` and applied via CSS variables/data
-attributes.
-
-- Theme: theme pack, color scheme (auto/light/dark), colorblind-friendly palette
-- Numbers: font, style, glyph mode, larger numbers, high-contrast numbers
-- Patterns & textures: patterns, texture/grain intensity, per-tile variation
-- Motion: animations + intensity, reduce motion (auto/on/off), win/lose moments
-- HUD & layout: HUD style, board frame, background style, vignette
-- Cursor & interaction: custom cursor, hover highlight, chord preview, press feedback
-- Audio & haptics: SFX + ambience + volumes, haptics
 
 ## Notes
 
-- Visual settings are always optional and must not reduce readability or
-  performance.
+- Default board is 10x10 with 12 mines (matches the theme inspiration).

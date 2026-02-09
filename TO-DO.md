@@ -10,8 +10,23 @@ Rules:
 - [x] (2026-02-09) Project started. Bootstrapped Vite + React + TS with ESLint, Prettier, and Vitest.
 - [x] (2026-02-09) Milestone 11: Seed bar + shareable URL state (w/h/m/seed + sx/sy after first reveal), with optional theme + compact visual preset.
 - [x] (2026-02-09) Milestone 12: Accessibility + perf pass (colorblind palette, focus rings, board render optimizations), README updated.
+- [x] (2026-02-09) Pivot: removed the entire Settings/"studio" options system and extra polish features; re-themed the app as a slim Garden Sweeper default.
 
 ---
+
+NOTE: Milestones 3–12 below were completed earlier, but the project has since pivoted to a slim app and those option-heavy features were intentionally removed. Keep this section as a historical record.
+
+---
+
+## Milestone 13 — Slim Garden Sweeper pivot
+
+- [x] Remove Settings UI + settings persistence.
+- [x] Remove theme packs, audio/haptics, stats/help extras.
+- [x] Apply Garden Sweeper default theme inspiration (fonts, colors, sticker HUD, board/tile styling).
+- [x] Keep core gameplay + seeded shareable links.
+
+Acceptance:
+- App is slim (no settings/options panels), still playable, and share links reproduce the board after first reveal.
 
 ## Milestone 0 — Bootstrap & guardrails
 

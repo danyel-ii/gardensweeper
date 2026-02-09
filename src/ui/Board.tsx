@@ -1,8 +1,7 @@
-import { memo, useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 
 import type { GameState } from '../engine/game'
-import { indexToX, indexToY, neighborIndices } from '../engine/grid'
-import { useSettings } from '../state/settings'
+import { indexToX, indexToY } from '../engine/grid'
 import { hashU32, u32ToUnit } from '../utils/hash'
 import { hashStringToU32 } from '../utils/rng'
 import { Tile } from './Tile'
@@ -10,38 +9,20 @@ import { Tile } from './Tile'
 type BoardProps = {
   game: GameState
   tileSizePx: number
-  revealOrigin: { x: number; y: number } | null
   onReveal: (x: number, y: number) => void
   onFlag: (x: number, y: number) => void
   onChord: (x: number, y: number) => void
 }
 
-function BoardImpl({
-  game,
-  tileSizePx,
-  revealOrigin,
-  onReveal,
-  onFlag,
-  onChord,
-}: BoardProps) {
-  const { settings, effectiveReduceMotion } = useSettings()
+export function Board({ game, tileSizePx, onReveal, onFlag, onChord }: BoardProps) {
   const width = game.config.width
   const height = game.config.height
   const total = width * height
   const disabled = game.status !== 'playing'
-  const variation = settings.proceduralVariation
-  const waveOn =
-    settings.animationsEnabled &&
-    !effectiveReduceMotion &&
-    settings.revealAnimationEnabled &&
-    settings.floodWaveEnabled
-  const waveStepMs = Math.max(0, Math.round(12 * settings.animationIntensity))
 
   const seedU32 = useMemo(() => hashStringToU32(game.config.seed), [game.config.seed])
 
   const [focusIndex, setFocusIndex] = useState(0)
-  const [hoverIndex, setHoverIndex] = useState<number | null>(null)
-  const [shiftDown, setShiftDown] = useState(false)
   const tileRefs = useRef<Array<HTMLButtonElement | null>>([])
 
   useEffect(() => {
@@ -53,49 +34,6 @@ function BoardImpl({
   const setRef = (index: number, el: HTMLButtonElement | null) => {
     tileRefs.current[index] = el
   }
-
-  useEffect(() => {
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Shift') setShiftDown(true)
-    }
-    const onKeyUp = (e: KeyboardEvent) => {
-      if (e.key === 'Shift') setShiftDown(false)
-    }
-    const onBlur = () => setShiftDown(false)
-    window.addEventListener('keydown', onKeyDown)
-    window.addEventListener('keyup', onKeyUp)
-    window.addEventListener('blur', onBlur)
-    return () => {
-      window.removeEventListener('keydown', onKeyDown)
-      window.removeEventListener('keyup', onKeyUp)
-      window.removeEventListener('blur', onBlur)
-    }
-  }, [])
-
-  const chordPreviewSet = useMemo(() => {
-    if (!settings.chordPreviewEnabled) return null
-    if (!shiftDown) return null
-    const origin = hoverIndex ?? focusIndex
-    if (game.revealed[origin] !== 1) return null
-    if (game.board.adjacentMineCounts[origin] === 0) return null
-    const out = new Set<number>()
-    for (const n of neighborIndices(width, height, origin)) {
-      if (game.revealed[n] === 1) continue
-      if (game.flagged[n] === 1) continue
-      out.add(n)
-    }
-    return out
-  }, [
-    settings.chordPreviewEnabled,
-    shiftDown,
-    hoverIndex,
-    focusIndex,
-    game.revealed,
-    game.flagged,
-    game.board.adjacentMineCounts,
-    width,
-    height,
-  ])
 
   const gridStyle = useMemo(
     () => ({
@@ -178,24 +116,15 @@ function BoardImpl({
               ? 'Flagged'
               : 'Hidden'
 
-          let tvRotDeg = 0
-          let tvBright = 1
-          if (variation > 0) {
+          // Slight "handmade" rotation for unrevealed tiles, deterministic by seed and coords.
+          let rotDeg = 0
+          if (!revealed) {
             const base =
               seedU32 ^
               Math.imul(x + 1, 0x9e3779b1) ^
               Math.imul(y + 1, 0x85ebca6b)
-            const u1 = u32ToUnit(hashU32(base))
-            const u2 = u32ToUnit(hashU32(base ^ 0x27d4eb2d))
-            tvRotDeg = (u1 * 2 - 1) * (1.15 * variation)
-            tvBright = 1 + (u2 * 2 - 1) * (0.06 * variation)
-          }
-
-          let revealDelayMs = 0
-          if (waveOn && revealOrigin && waveStepMs > 0) {
-            const dist =
-              Math.abs(x - revealOrigin.x) + Math.abs(y - revealOrigin.y)
-            revealDelayMs = Math.min(180, dist * waveStepMs)
+            const u = u32ToUnit(hashU32(base))
+            rotDeg = (u * 2 - 1) * 2.1
           }
 
           return (
@@ -211,14 +140,9 @@ function BoardImpl({
               disabled={disabled}
               tabIndex={index === focusIndex ? 0 : -1}
               tileSizePx={tileSizePx}
-              tvRotDeg={tvRotDeg}
-              tvBright={tvBright}
-              revealDelayMs={revealDelayMs}
-              glyphModeEnabled={settings.glyphModeEnabled}
-              chordPreview={chordPreviewSet?.has(index) ?? false}
+              rotDeg={rotDeg}
               ariaLabel={ariaLabel}
               onFocusIndex={setFocusIndex}
-              onHoverIndex={setHoverIndex}
               onReveal={onReveal}
               onFlag={onFlag}
               onChord={onChord}
@@ -231,4 +155,3 @@ function BoardImpl({
   )
 }
 
-export const Board = memo(BoardImpl)

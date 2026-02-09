@@ -1,5 +1,5 @@
 {
-  "name": "minesweeper-studio",
+  "name": "garden-sweeper",
   "private": true,
   "version": "0.1.0",
   "type": "module",
@@ -13,9 +13,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@fontsource/atkinson-hyperlegible": "^5.2.6",
-    "@fontsource/caveat": "^5.2.6",
-    "@fontsource/ibm-plex-mono": "^5.2.6",
+    "@fontsource/chewy": "^5.2.6",
+    "@fontsource/patrick-hand": "^5.2.6",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"
   },
