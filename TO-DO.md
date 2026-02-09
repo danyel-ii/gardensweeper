@@ -64,19 +64,19 @@ Acceptance:
 
 ## Milestone 2 — Minimal playable UI (no fancy visuals yet)
 
-- [ ] Build basic layout:
+- [x] Build basic layout:
   - top HUD: mines remaining, timer, reset button
   - board grid
-- [ ] Implement tile interactions:
+- [x] Implement tile interactions:
   - left click: reveal
   - right click/context menu: flag
   - chord: mouse (e.g. middle click OR left+right OR keyboard modifier)
-- [ ] Add difficulties + restart:
+- [x] Add difficulties + restart:
   - Beginner / Intermediate / Expert
   - Custom (simple modal/form)
-- [ ] Implement timer start on first action; stop on win/loss.
-- [ ] Add basic win/lose modal.
-- [ ] Add keyboard shortcuts (initial set):
+- [x] Implement timer start on first action; stop on win/loss.
+- [x] Add basic win/lose modal.
+- [x] Add keyboard shortcuts (initial set):
   - R = restart
   - 1/2/3 = difficulty presets
   - Arrow keys move focus (optional), Enter reveal, F flag (optional)
