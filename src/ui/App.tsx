@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import type { BoardSpec } from '../engine/board'
 import { revealCell } from '../engine/game'
@@ -64,7 +64,7 @@ export default function App() {
     null,
   )
 
-  const initial = useMemo(() => {
+  const [boot] = useState(() => {
     const parsed = parseUrlParams(window.location.search)
     const keepVisualPresetInUrl = Boolean(parsed.visual?.preset)
     const fromUrl = parsed.game
@@ -98,13 +98,13 @@ export default function App() {
       seedDraft,
       keepVisualPresetInUrl,
     }
-  }, [])
+  })
 
-  const [difficulty, setDifficulty] = useState<DifficultyId>(initial.difficulty)
-  const [spec, setSpec] = useState<BoardSpec>(() => initial.spec)
-  const [game, setGame] = useState<GameState>(() => initial.game)
-  const [seedDraft, setSeedDraft] = useState(() => initial.seedDraft)
-  const keepVisualPresetInUrl = initial.keepVisualPresetInUrl
+  const [difficulty, setDifficulty] = useState<DifficultyId>(() => boot.difficulty)
+  const [spec, setSpec] = useState<BoardSpec>(() => boot.spec)
+  const [game, setGame] = useState<GameState>(() => boot.game)
+  const [seedDraft, setSeedDraft] = useState(() => boot.seedDraft)
+  const keepVisualPresetInUrl = boot.keepVisualPresetInUrl
 
   const [tMs, setTMs] = useState(() => nowMs())
   const [customOpen, setCustomOpen] = useState(false)
@@ -126,6 +126,20 @@ export default function App() {
   const elapsedSeconds = computeElapsedSeconds(game, tMs)
   const tileSizePx = computeTileSizePx(game.config.width)
   const canCopyLink = game.generated && game.firstClickIndex != null
+
+  const beginNewGame = useCallback(
+    (nextSpec: BoardSpec, nextDifficulty: DifficultyId, nextSeed: string) => {
+      const seed = nextSeed.trim()
+      if (seed.length === 0) return
+      setDifficulty(nextDifficulty)
+      setSpec(nextSpec)
+      setSeedDraft(seed)
+      setRevealOrigin(null)
+      setCopied(false)
+      setGame(createNewGame({ ...nextSpec, seed }))
+    },
+    [setCopied, setDifficulty, setGame, setRevealOrigin, setSeedDraft, setSpec],
+  )
 
   useEffect(() => {
     const prev = prevGameRef.current
@@ -182,10 +196,6 @@ export default function App() {
   }, [setSettings])
 
   useEffect(() => {
-    setSeedDraft(game.config.seed)
-  }, [game.config.seed])
-
-  useEffect(() => {
     const start =
       game.generated && game.firstClickIndex != null
         ? {
@@ -217,13 +227,6 @@ export default function App() {
     settings,
     keepVisualPresetInUrl,
   ])
-
-  useEffect(() => {
-    if (game.status !== 'won') return
-    if (difficulty === 'custom') return
-    const key = difficulty as DifficultyKey
-    setStats((s) => recordWin(s, key, elapsedSeconds))
-  }, [game.status, game.config.seed, difficulty, elapsedSeconds])
 
   // Timer ticker: only while game is active and started.
   useEffect(() => {
@@ -269,48 +272,67 @@ export default function App() {
 
       if (e.key === 'r' || e.key === 'R') {
         e.preventDefault()
-        setRevealOrigin(null)
-        setGame(createNewGame({ ...spec, seed: randomSeed() }))
+        beginNewGame(spec, difficulty, randomSeed())
         return
       }
       if (e.key === '1') {
         e.preventDefault()
         const p = PRESETS.find((x) => x.id === 'beginner')!
-        setRevealOrigin(null)
-        setDifficulty('beginner')
-        setSpec(p.spec)
-        setGame(createNewGame({ ...p.spec, seed: randomSeed() }))
+        beginNewGame(p.spec, 'beginner', randomSeed())
         return
       }
       if (e.key === '2') {
         e.preventDefault()
         const p = PRESETS.find((x) => x.id === 'intermediate')!
-        setRevealOrigin(null)
-        setDifficulty('intermediate')
-        setSpec(p.spec)
-        setGame(createNewGame({ ...p.spec, seed: randomSeed() }))
+        beginNewGame(p.spec, 'intermediate', randomSeed())
         return
       }
       if (e.key === '3') {
         e.preventDefault()
         const p = PRESETS.find((x) => x.id === 'expert')!
-        setRevealOrigin(null)
-        setDifficulty('expert')
-        setSpec(p.spec)
-        setGame(createNewGame({ ...p.spec, seed: randomSeed() }))
+        beginNewGame(p.spec, 'expert', randomSeed())
       }
     }
 
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
-  }, [spec, setSettings])
+  }, [beginNewGame, difficulty, spec, setSettings])
 
-  const startNewGame = (nextSpec: BoardSpec, nextDifficulty: DifficultyId) => {
-    setDifficulty(nextDifficulty)
-    setSpec(nextSpec)
-    setGame(createNewGame({ ...nextSpec, seed: randomSeed() }))
-    setRevealOrigin(null)
-  }
+  const handleReveal = useCallback(
+    (x: number, y: number) => {
+      const t = nowMs()
+      setRevealOrigin({ x, y })
+      setGame((g) => {
+        const next = revealCell(g, x, y, t).state
+        if (g.status === 'playing' && next.status === 'won' && difficulty !== 'custom') {
+          const key = difficulty as DifficultyKey
+          setStats((s) => recordWin(s, key, computeElapsedSeconds(next, t)))
+        }
+        return next
+      })
+    },
+    [difficulty],
+  )
+
+  const handleFlag = useCallback((x: number, y: number) => {
+    setGame((g) => toggleFlag(g, x, y, nowMs()))
+  }, [])
+
+  const handleChord = useCallback(
+    (x: number, y: number) => {
+      const t = nowMs()
+      setRevealOrigin({ x, y })
+      setGame((g) => {
+        const next = chord(g, x, y, t)
+        if (g.status === 'playing' && next.status === 'won' && difficulty !== 'custom') {
+          const key = difficulty as DifficultyKey
+          setStats((s) => recordWin(s, key, computeElapsedSeconds(next, t)))
+        }
+        return next
+      })
+    },
+    [difficulty],
+  )
 
   return (
     <div className="app" data-app data-game-status={game.status}>
@@ -320,8 +342,8 @@ export default function App() {
             <div>
               <h1 className="appTitle">Minesweeper Studio</h1>
               <p className="appSubtitle">
-                Core gameplay first. Visual "studio" settings arrive in the next
-                milestones.
+                Classic Minesweeper, plus optional "studio" settings for themes, texture,
+                motion, HUD, cursor, and sound.
               </p>
             </div>
             <div className="headerMeta">
@@ -360,12 +382,11 @@ export default function App() {
             difficultyLabel={difficultyLabel}
             status={game.status}
             onRestart={() => {
-              setRevealOrigin(null)
-              setGame(createNewGame({ ...spec, seed: randomSeed() }))
+              beginNewGame(spec, difficulty, randomSeed())
             }}
             onPreset={(id) => {
               const p = PRESETS.find((x) => x.id === id)!
-              startNewGame(p.spec, id)
+              beginNewGame(p.spec, id, randomSeed())
             }}
             onOpenCustom={() => setCustomOpen(true)}
           />
@@ -381,8 +402,7 @@ export default function App() {
                   if (e.key !== 'Enter') return
                   const nextSeed = seedDraft.trim()
                   if (!nextSeed) return
-                  setRevealOrigin(null)
-                  setGame(createNewGame({ ...spec, seed: nextSeed }))
+                  beginNewGame(spec, difficulty, nextSeed)
                 }}
               />
             </label>
@@ -391,10 +411,7 @@ export default function App() {
                 className="btn btnGhost"
                 type="button"
                 onClick={() => {
-                  const nextSeed = randomSeed()
-                  setSeedDraft(nextSeed)
-                  setRevealOrigin(null)
-                  setGame(createNewGame({ ...spec, seed: nextSeed }))
+                  beginNewGame(spec, difficulty, randomSeed())
                 }}
               >
                 New seed
@@ -406,8 +423,7 @@ export default function App() {
                 onClick={() => {
                   const nextSeed = seedDraft.trim()
                   if (!nextSeed) return
-                  setRevealOrigin(null)
-                  setGame(createNewGame({ ...spec, seed: nextSeed }))
+                  beginNewGame(spec, difficulty, nextSeed)
                 }}
               >
                 Set seed
@@ -468,20 +484,13 @@ export default function App() {
           </div>
 
           <Board
+            key={`${game.config.width}x${game.config.height}:${game.config.mineCount}:${game.config.seed}`}
             game={game}
             tileSizePx={tileSizePx}
             revealOrigin={revealOrigin}
-            onReveal={(x, y) => {
-              setRevealOrigin({ x, y })
-              setGame((g) => revealCell(g, x, y, nowMs()).state)
-            }}
-            onFlag={(x, y) => {
-              setGame((g) => toggleFlag(g, x, y, nowMs()))
-            }}
-            onChord={(x, y) => {
-              setRevealOrigin({ x, y })
-              setGame((g) => chord(g, x, y, nowMs()))
-            }}
+            onReveal={handleReveal}
+            onFlag={handleFlag}
+            onChord={handleChord}
           />
         </section>
 
@@ -529,7 +538,7 @@ export default function App() {
         open={customOpen}
         initialSpec={spec}
         onClose={() => setCustomOpen(false)}
-        onStart={(nextSpec) => startNewGame(nextSpec, 'custom')}
+        onStart={(nextSpec) => beginNewGame(nextSpec, 'custom', randomSeed())}
       />
 
       <SettingsModal open={settingsOpen} onClose={() => setSettingsOpen(false)} />
@@ -545,16 +554,14 @@ export default function App() {
         open={game.status === 'won'}
         title="You win"
         onClose={() => {
-          setRevealOrigin(null)
-          setGame(createNewGame({ ...spec, seed: randomSeed() }))
+          beginNewGame(spec, difficulty, randomSeed())
         }}
         actions={
           <>
             <button
               className="btn btnGhost"
               onClick={() => {
-                setRevealOrigin(null)
-                setGame(createNewGame({ ...spec, seed: randomSeed() }))
+                beginNewGame(spec, difficulty, randomSeed())
               }}
             >
               Close
@@ -562,8 +569,7 @@ export default function App() {
             <button
               className="btn"
               onClick={() => {
-                setRevealOrigin(null)
-                setGame(createNewGame({ ...spec, seed: randomSeed() }))
+                beginNewGame(spec, difficulty, randomSeed())
               }}
             >
               New game
@@ -580,16 +586,14 @@ export default function App() {
         open={game.status === 'lost'}
         title="Boom"
         onClose={() => {
-          setRevealOrigin(null)
-          setGame(createNewGame({ ...spec, seed: randomSeed() }))
+          beginNewGame(spec, difficulty, randomSeed())
         }}
         actions={
           <>
             <button
               className="btn btnGhost"
               onClick={() => {
-                setRevealOrigin(null)
-                setGame(createNewGame({ ...spec, seed: randomSeed() }))
+                beginNewGame(spec, difficulty, randomSeed())
               }}
             >
               Close
@@ -597,8 +601,7 @@ export default function App() {
             <button
               className="btn"
               onClick={() => {
-                setRevealOrigin(null)
-                setGame(createNewGame({ ...spec, seed: randomSeed() }))
+                beginNewGame(spec, difficulty, randomSeed())
               }}
             >
               Restart
@@ -611,8 +614,8 @@ export default function App() {
 
       <footer className="appFooter">
         <small>
-          Milestone 2 UI: playable core. Milestones 3+ add Settings, themes, and
-          polish.
+          Seeded, shareable boards. Studio settings persist locally and honor
+          prefers-reduced-motion.
         </small>
       </footer>
     </div>

@@ -24,7 +24,7 @@ function hapticPattern(name: HapticName): number | number[] {
 
 export function useAudio(settings: Settings) {
   const engineRef = useRef<SoundEngine | null>(null)
-  if (!engineRef.current) engineRef.current = new SoundEngine()
+  if (engineRef.current == null) engineRef.current = new SoundEngine()
 
   useEffect(() => {
     engineRef.current!.setAmbience(settings.ambienceEnabled, settings.ambienceVolume)
@@ -52,4 +52,3 @@ export function useAudio(settings: Settings) {
 
   return { playSfx, haptic }
 }
-

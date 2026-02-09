@@ -112,6 +112,25 @@
   --n8: #334155;
 }
 
+:root[data-colorblind='on'] {
+  /* Okabe-Ito inspired: avoid red/green reliance. */
+  --n1: #56b4e9; /* sky */
+  --n2: #009e73; /* bluish green */
+  --n3: #e69f00; /* orange */
+  --n4: #0072b2; /* blue */
+  --n5: #cc79a7; /* purple */
+  --n6: #f0e442; /* yellow */
+}
+
+:root[data-color-scheme='light'][data-colorblind='on'] {
+  --n1: #0072b2;
+  --n2: #009e73;
+  --n3: #d55e00;
+  --n4: #7b2f72;
+  --n5: #a15a00;
+  --n6: #2f9fd6;
+}
+
 :root[data-large-numbers='on'] {
   --tileFontSize: 16px;
 }
@@ -335,6 +354,11 @@ a:hover {
 .btn:disabled {
   opacity: 0.55;
   cursor: not-allowed;
+}
+
+.btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 .btnGhost {
@@ -576,6 +600,12 @@ a:hover {
     transform var(--animFast) ease,
     background var(--animFast) ease,
     border-color var(--animFast) ease;
+}
+
+.tile:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  z-index: 2;
 }
 
 .tile::after {
@@ -1037,6 +1067,11 @@ a:hover {
   outline: none;
 }
 
+.select:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
 .range {
   width: 100%;
 }
@@ -1064,6 +1099,11 @@ a:hover {
 .themeCard:hover {
   background: var(--surfaceHover);
   border-color: var(--lineHover);
+}
+
+.themeCard:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 .themeCardSelected {

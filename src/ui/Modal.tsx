@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { useEffect, useRef } from 'react'
+import { useEffect, useId } from 'react'
 
 type ModalProps = {
   open: boolean
@@ -10,7 +10,7 @@ type ModalProps = {
 }
 
 export function Modal({ open, title, children, actions, onClose }: ModalProps) {
-  const titleId = useRef(`modal_${Math.random().toString(16).slice(2)}`)
+  const titleId = useId()
 
   useEffect(() => {
     if (!open) return
@@ -29,11 +29,11 @@ export function Modal({ open, title, children, actions, onClose }: ModalProps) {
         className="modal"
         role="dialog"
         aria-modal="true"
-        aria-labelledby={titleId.current}
+        aria-labelledby={titleId}
         onMouseDown={(e) => e.stopPropagation()}
       >
         <div className="modalHeader">
-          <h2 className="modalTitle" id={titleId.current}>
+          <h2 className="modalTitle" id={titleId}>
             {title}
           </h2>
           <button className="btn btnGhost" onClick={onClose} aria-label="Close">
@@ -46,4 +46,3 @@ export function Modal({ open, title, children, actions, onClose }: ModalProps) {
     </div>
   )
 }
-

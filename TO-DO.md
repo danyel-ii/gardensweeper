@@ -9,6 +9,7 @@ Rules:
 ## Progress log (append-only)
 - [x] (2026-02-09) Project started. Bootstrapped Vite + React + TS with ESLint, Prettier, and Vitest.
 - [x] (2026-02-09) Milestone 11: Seed bar + shareable URL state (w/h/m/seed + sx/sy after first reveal), with optional theme + compact visual preset.
+- [x] (2026-02-09) Milestone 12: Accessibility + perf pass (colorblind palette, focus rings, board render optimizations), README updated.
 
 ---
 
@@ -242,17 +243,17 @@ Acceptance:
 
 ## Milestone 12 — Final QA, accessibility, and performance
 
-- [ ] Accessibility pass:
+- [x] Accessibility pass:
   - colorblind-friendly mode
   - keyboard operable core actions
   - focus states visible
   - ARIA labels for controls
-- [ ] Performance pass:
+- [x] Performance pass:
   - Tile rendering does not lag on Expert board
   - Avoid layout thrash in animations
-- [ ] Cross-browser sanity:
+- [x] Cross-browser sanity:
   - Chrome, Firefox, Safari basics
-- [ ] Update README with:
+- [x] Update README with:
   - controls
   - settings explanations
   - theming overview

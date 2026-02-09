@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { memo, useEffect, useMemo, useRef, useState } from 'react'
 
 import type { GameState } from '../engine/game'
 import { indexToX, indexToY, neighborIndices } from '../engine/grid'
@@ -16,7 +16,7 @@ type BoardProps = {
   onChord: (x: number, y: number) => void
 }
 
-export function Board({
+function BoardImpl({
   game,
   tileSizePx,
   revealOrigin,
@@ -53,12 +53,6 @@ export function Board({
   const setRef = (index: number, el: HTMLButtonElement | null) => {
     tileRefs.current[index] = el
   }
-
-  useEffect(() => {
-    // Reset focus on new games.
-    setFocusIndex(0)
-    setHoverIndex(null)
-  }, [game.config.seed, width, height, game.config.mineCount])
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
@@ -236,3 +230,5 @@ export function Board({
     </div>
   )
 }
+
+export const Board = memo(BoardImpl)

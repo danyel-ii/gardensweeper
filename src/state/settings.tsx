@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import type { ReactNode } from 'react'
 import { createContext, useContext, useEffect, useMemo, useState } from 'react'
 
@@ -371,6 +372,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     root.dataset.animations = motionOn ? 'on' : 'off'
     root.dataset.largeNumbers = settings.largeNumbers ? 'on' : 'off'
     root.dataset.highContrastNumbers = settings.highContrastNumbers ? 'on' : 'off'
+    root.dataset.colorblind = settings.colorblindPaletteEnabled ? 'on' : 'off'
     root.dataset.patterns = settings.patternsEnabled ? 'on' : 'off'
     root.dataset.texture = settings.textureEnabled ? 'on' : 'off'
     root.dataset.grain = settings.grainEnabled ? 'on' : 'off'

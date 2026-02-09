@@ -127,7 +127,7 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
                 }))
               }
             />
-            Colorblind-friendly palette (coming soon)
+            Colorblind-friendly palette
           </label>
         </div>
       </div>
