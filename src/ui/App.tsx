@@ -9,6 +9,7 @@ import { Board } from './Board'
 import { CustomGameModal } from './CustomGameModal'
 import { Hud } from './Hud'
 import { Modal } from './Modal'
+import { SettingsModal } from './SettingsModal'
 
 function nowMs(): number {
   return Date.now()
@@ -43,6 +44,7 @@ export default function App() {
 
   const [tMs, setTMs] = useState(() => nowMs())
   const [customOpen, setCustomOpen] = useState(false)
+  const [settingsOpen, setSettingsOpen] = useState(false)
 
   const difficultyLabel = useMemo(
     () => bestDifficultyLabel(difficulty, spec),
@@ -127,6 +129,13 @@ export default function App() {
             </div>
             <div className="headerMeta">
               <span className="metaPill">{difficultyLabel}</span>
+              <button
+                className="btn btnGhost"
+                type="button"
+                onClick={() => setSettingsOpen(true)}
+              >
+                Settings
+              </button>
             </div>
           </div>
         </div>
@@ -206,6 +215,8 @@ export default function App() {
         onStart={(nextSpec) => startNewGame(nextSpec, 'custom')}
       />
 
+      <SettingsModal open={settingsOpen} onClose={() => setSettingsOpen(false)} />
+
       <Modal
         open={game.status === 'won'}
         title="You win"
@@ -265,4 +276,3 @@ export default function App() {
     </div>
   )
 }
-

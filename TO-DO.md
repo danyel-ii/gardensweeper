@@ -88,16 +88,16 @@ Acceptance:
 
 ## Milestone 3 — Settings system (foundation for all beautification)
 
-- [ ] Implement Settings store with:
+- [x] Implement Settings store with:
   - defaults
   - versioning + migration
   - localStorage persistence
-- [ ] Create Settings UI:
+- [x] Create Settings UI:
   - button opens drawer/modal
   - categories + toggles + sliders
   - “Reset to defaults”
-- [ ] Add “Preview” area in settings for theme selection.
-- [ ] Implement `prefers-reduced-motion` + `prefers-color-scheme` integration:
+- [x] Add “Preview” area in settings for theme selection.
+- [x] Implement `prefers-reduced-motion` + `prefers-color-scheme` integration:
   - default settings follow system, user override allowed.
 
 Acceptance:

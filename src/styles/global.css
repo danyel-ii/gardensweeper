@@ -8,10 +8,28 @@
   --accent: #7dd3fc;
   --radius: 14px;
   --shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+  --line: rgba(255, 255, 255, 0.14);
+  --lineHover: rgba(255, 255, 255, 0.22);
+  --lineSubtle: rgba(255, 255, 255, 0.1);
+  --surface: rgba(255, 255, 255, 0.08);
+  --surfaceHover: rgba(255, 255, 255, 0.11);
+  --surfaceTile: rgba(255, 255, 255, 0.1);
+  --surfaceTileHover: rgba(255, 255, 255, 0.14);
+  --surfaceInset: rgba(0, 0, 0, 0.22);
+  --surfaceInset2: rgba(0, 0, 0, 0.18);
+  --surfaceRevealed: rgba(0, 0, 0, 0.26);
+  --overlay: rgba(0, 0, 0, 0.62);
+  --modalBg: rgba(16, 22, 32, 0.92);
+  --shadowModal: 0 22px 80px rgba(0, 0, 0, 0.55);
+  --labelSoft: rgba(255, 255, 255, 0.62);
+  --titleSoft: rgba(255, 255, 255, 0.78);
+  --dashed: rgba(255, 255, 255, 0.18);
+  --animFast: 120ms;
+  --animSlow: 220ms;
+  --tileFontSize: 14px;
   --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
     'Liberation Mono', 'Courier New', monospace;
 
-  color-scheme: dark;
   color: var(--text0);
   background: radial-gradient(1200px 800px at 20% 10%, var(--bg1), var(--bg0));
 
@@ -20,6 +38,41 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Applied by SettingsProvider */
+:root[data-color-scheme='dark'] {
+  color-scheme: dark;
+}
+
+:root[data-color-scheme='light'] {
+  color-scheme: light;
+  --line: rgba(0, 0, 0, 0.12);
+  --lineHover: rgba(0, 0, 0, 0.2);
+  --lineSubtle: rgba(0, 0, 0, 0.1);
+  --surface: rgba(0, 0, 0, 0.04);
+  --surfaceHover: rgba(0, 0, 0, 0.06);
+  --surfaceTile: rgba(0, 0, 0, 0.04);
+  --surfaceTileHover: rgba(0, 0, 0, 0.06);
+  --surfaceInset: rgba(0, 0, 0, 0.05);
+  --surfaceInset2: rgba(0, 0, 0, 0.04);
+  --surfaceRevealed: rgba(0, 0, 0, 0.08);
+  --overlay: rgba(0, 0, 0, 0.46);
+  --modalBg: rgba(245, 247, 251, 0.94);
+  --shadowModal: 0 22px 80px rgba(0, 0, 0, 0.22);
+  --labelSoft: rgba(0, 0, 0, 0.62);
+  --titleSoft: rgba(0, 0, 0, 0.78);
+  --dashed: rgba(0, 0, 0, 0.18);
+}
+
+:root[data-large-numbers='on'] {
+  --tileFontSize: 16px;
+}
+
+:root[data-high-contrast-numbers='on'] .tileContent {
+  text-shadow:
+    0 1px 0 rgba(0, 0, 0, 0.65),
+    0 0 12px rgba(0, 0, 0, 0.4);
 }
 
 * {
@@ -88,11 +141,11 @@ a:hover {
   font-family: var(--mono);
   font-size: 12px;
   letter-spacing: 0.06em;
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  border: 1px solid var(--line);
   border-radius: 999px;
   padding: 8px 10px;
   color: var(--text1);
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--surface);
 }
 
 .appMain {
@@ -130,7 +183,7 @@ a:hover {
 
 .placeholder {
   border-radius: calc(var(--radius) - 6px);
-  border: 1px dashed rgba(255, 255, 255, 0.18);
+  border: 1px dashed var(--dashed);
   padding: 16px;
   color: var(--text1);
   line-height: 1.6;
@@ -138,21 +191,21 @@ a:hover {
 
 .btn {
   appearance: none;
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  border: 1px solid var(--line);
   border-radius: 12px;
   padding: 10px 12px;
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--surface);
   color: var(--text0);
   font-family: inherit;
   cursor: pointer;
   transition:
-    transform 120ms ease,
-    background 120ms ease,
-    border-color 120ms ease;
+    transform var(--animFast) ease,
+    background var(--animFast) ease,
+    border-color var(--animFast) ease;
 }
 .btn:hover {
-  background: rgba(255, 255, 255, 0.11);
-  border-color: rgba(255, 255, 255, 0.22);
+  background: var(--surfaceHover);
+  border-color: var(--lineHover);
 }
 .btn:active {
   transform: translateY(1px);
@@ -164,7 +217,7 @@ a:hover {
 
 .btnGhost {
   background: transparent;
-  border-color: rgba(255, 255, 255, 0.12);
+  border-color: var(--lineSubtle);
 }
 
 .hud {
@@ -198,8 +251,8 @@ a:hover {
   gap: 2px;
   padding: 10px 12px;
   border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(0, 0, 0, 0.22);
+  border: 1px solid var(--lineSubtle);
+  background: var(--surfaceInset);
   min-width: 92px;
 }
 
@@ -242,15 +295,15 @@ a:hover {
   padding: 8px;
   width: max-content;
   border-radius: 14px;
-  background: rgba(0, 0, 0, 0.18);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: var(--surfaceInset2);
+  border: 1px solid var(--lineSubtle);
 }
 
 .tile {
   appearance: none;
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  border: 1px solid var(--line);
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--surfaceTile);
   color: var(--text0);
   display: grid;
   place-items: center;
@@ -258,14 +311,14 @@ a:hover {
   cursor: pointer;
   user-select: none;
   transition:
-    transform 80ms ease,
-    background 120ms ease,
-    border-color 120ms ease;
+    transform var(--animFast) ease,
+    background var(--animFast) ease,
+    border-color var(--animFast) ease;
 }
 
 .tile.hidden:hover {
-  background: rgba(255, 255, 255, 0.14);
-  border-color: rgba(255, 255, 255, 0.22);
+  background: var(--surfaceTileHover);
+  border-color: var(--lineHover);
 }
 
 .tile.hidden:active {
@@ -274,8 +327,8 @@ a:hover {
 
 .tile.revealed {
   cursor: default;
-  background: rgba(0, 0, 0, 0.26);
-  border-color: rgba(255, 255, 255, 0.08);
+  background: var(--surfaceRevealed);
+  border-color: var(--lineSubtle);
 }
 
 .tile.mine {
@@ -294,7 +347,7 @@ a:hover {
 
 .tileContent {
   font-family: var(--mono);
-  font-size: 14px;
+  font-size: var(--tileFontSize);
   font-weight: 800;
   line-height: 1;
 }
@@ -349,7 +402,7 @@ a:hover {
 .modalOverlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.62);
+  background: var(--overlay);
   display: grid;
   place-items: center;
   padding: 18px;
@@ -359,9 +412,9 @@ a:hover {
 .modal {
   width: min(560px, 100%);
   border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  background: rgba(16, 22, 32, 0.92);
-  box-shadow: 0 22px 80px rgba(0, 0, 0, 0.55);
+  border: 1px solid var(--line);
+  background: var(--modalBg);
+  box-shadow: var(--shadowModal);
   backdrop-filter: blur(10px);
 }
 
@@ -371,7 +424,7 @@ a:hover {
   justify-content: space-between;
   gap: 10px;
   padding: 14px 14px 8px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid var(--lineSubtle);
 }
 
 .modalTitle {
@@ -417,8 +470,8 @@ a:hover {
 
 .input {
   border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--line);
+  background: var(--surface);
   color: var(--text0);
   padding: 10px 10px;
   font-family: var(--mono);
@@ -437,6 +490,125 @@ a:hover {
   color: rgba(255, 255, 255, 0.86);
   padding: 10px 12px;
   border-radius: 12px;
+}
+
+.settingsMeta {
+  margin: 0 0 12px;
+  color: var(--text1);
+}
+
+.settingsMetaLabel {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--labelSoft);
+}
+
+.settingsSection {
+  padding: 12px 0;
+  border-top: 1px solid var(--lineSubtle);
+}
+
+.settingsSection:first-of-type {
+  border-top: none;
+  padding-top: 0;
+}
+
+.settingsH3 {
+  margin: 0 0 10px;
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--titleSoft);
+  font-family: var(--mono);
+}
+
+.settingsRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.settingsLabel {
+  display: grid;
+  gap: 6px;
+  color: var(--text1);
+  font-size: 14px;
+}
+
+.settingsToggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.select {
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--text0);
+  padding: 10px 10px;
+  font-family: var(--mono);
+  outline: none;
+}
+
+.range {
+  width: 100%;
+}
+
+.themeGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.themeCard {
+  text-align: left;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  padding: 10px;
+  cursor: pointer;
+  color: inherit;
+  transition:
+    transform var(--animFast) ease,
+    background var(--animFast) ease,
+    border-color var(--animFast) ease;
+}
+
+.themeCard:hover {
+  background: var(--surfaceHover);
+  border-color: var(--lineHover);
+}
+
+.themeCardSelected {
+  border-color: rgba(125, 211, 252, 0.55);
+  box-shadow: 0 0 0 3px rgba(125, 211, 252, 0.12);
+}
+
+.themeSwatch {
+  height: 54px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+}
+
+.themeCardText {
+  padding-top: 8px;
+  display: grid;
+  gap: 4px;
+}
+
+.themeName {
+  font-weight: 700;
+  color: var(--text0);
+}
+
+.themeDesc {
+  color: var(--text1);
+  font-size: 13px;
 }
 
 .appFooter {
@@ -465,5 +637,13 @@ a:hover {
 
   .hudRight {
     justify-content: flex-start;
+  }
+
+  .themeGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .formGrid {
+    grid-template-columns: 1fr;
   }
 }
