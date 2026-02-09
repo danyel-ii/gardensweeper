@@ -1,4 +1,4 @@
-import { generateBoard } from './board'
+import { assertValidSpec, generateBoard } from './board'
 import type { Board, BoardSpec } from './board'
 import { forEachNeighborIndex, inBounds, xyToIndex } from './grid'
 
@@ -30,6 +30,7 @@ function assertValidConfig(config: GameConfig): void {
   if (typeof config.seed !== 'string') {
     throw new Error('seed must be a string')
   }
+  assertValidSpec(config)
 }
 
 export function createNewGame(config: GameConfig): GameState {

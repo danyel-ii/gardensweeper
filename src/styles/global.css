@@ -350,6 +350,56 @@ a:hover {
   margin-bottom: 12px;
 }
 
+.seedBar {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px 12px;
+  align-items: end;
+  margin-bottom: 12px;
+  padding: 12px;
+  border-radius: 14px;
+  border: 1px solid var(--lineSubtle);
+  background: var(--surfaceInset);
+}
+
+.seedLabel {
+  display: grid;
+  gap: 6px;
+}
+
+.seedLabelText {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--labelSoft);
+}
+
+.seedInput {
+  width: 100%;
+  min-width: 180px;
+}
+
+.seedButtons {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+.seedHint {
+  grid-column: 1 / -1;
+  color: var(--text1);
+  font-size: 13px;
+}
+
+.seedCopied {
+  font-family: var(--mono);
+  color: var(--text0);
+  letter-spacing: 0.08em;
+}
+
 .hudLeft,
 .hudRight {
   display: flex;
@@ -1068,6 +1118,15 @@ a:hover {
   }
 
   .hudRight {
+    justify-content: flex-start;
+  }
+
+  .seedBar {
+    grid-template-columns: 1fr;
+    align-items: stretch;
+  }
+
+  .seedButtons {
     justify-content: flex-start;
   }
 

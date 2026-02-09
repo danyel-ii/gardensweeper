@@ -8,6 +8,7 @@ Rules:
 
 ## Progress log (append-only)
 - [x] (2026-02-09) Project started. Bootstrapped Vite + React + TS with ESLint, Prettier, and Vitest.
+- [x] (2026-02-09) Milestone 11: Seed bar + shareable URL state (w/h/m/seed + sx/sy after first reveal), with optional theme + compact visual preset.
 
 ---
 
@@ -227,12 +228,12 @@ Acceptance:
 
 ## Milestone 11 — Shareable seeds + URL state
 
-- [ ] Add seed field + “New seed” button.
-- [ ] Encode game params into URL:
+- [x] Add seed field + “New seed” button.
+- [x] Encode game params into URL:
   - width/height/mines/seed
   - optionally theme id (and maybe a compact settings preset)
-- [ ] Add “Copy link” button.
-- [ ] Load from URL on startup.
+- [x] Add “Copy link” button.
+- [x] Load from URL on startup.
 
 Acceptance:
 - Two users opening the same link get the same board and visuals (as applicable).
