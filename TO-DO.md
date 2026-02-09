@@ -7,22 +7,22 @@ Rules:
 - After completing a task, tick it and add a short note if needed.
 
 ## Progress log (append-only)
-- [ ] (YYYY-MM-DD) Project started.
+- [x] (2026-02-09) Project started. Bootstrapped Vite + React + TS with ESLint, Prettier, and Vitest.
 
 ---
 
 ## Milestone 0 — Bootstrap & guardrails
 
-- [ ] Initialize project with Vite + React + TypeScript.
-- [ ] Add scripts: dev/build/preview/test/lint/format (as appropriate).
-- [ ] Add basic folder structure:
+- [x] Initialize project with Vite + React + TypeScript.
+- [x] Add scripts: dev/build/preview/test/lint/format (as appropriate).
+- [x] Add basic folder structure:
   - `src/engine`, `src/state`, `src/themes`, `src/ui`, `src/styles`, `src/utils`, `src/assets`
-- [ ] Add a minimal README:
+- [x] Add a minimal README:
   - how to run
   - basic controls
   - note that visuals are optional via Settings
-- [ ] Add ESLint + Prettier (or equivalent) and TypeScript strict mode.
-- [ ] Confirm: `npm run dev` opens a blank shell app.
+- [x] Add ESLint + Prettier (or equivalent) and TypeScript strict mode.
+- [x] Confirm: `npm run dev` opens a blank shell app.
 
 Acceptance:
 - Dev server runs, build passes, basic layout loads.

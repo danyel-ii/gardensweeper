@@ -1,0 +1,126 @@
+:root {
+  --bg0: #0e1116;
+  --bg1: #111a28;
+  --panel: rgba(255, 255, 255, 0.06);
+  --panelBorder: rgba(255, 255, 255, 0.12);
+  --text0: rgba(255, 255, 255, 0.92);
+  --text1: rgba(255, 255, 255, 0.72);
+  --accent: #7dd3fc;
+  --radius: 14px;
+  --shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+  --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    'Liberation Mono', 'Courier New', monospace;
+
+  color-scheme: dark;
+  color: var(--text0);
+  background: radial-gradient(1200px 800px at 20% 10%, var(--bg1), var(--bg0));
+
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto,
+    Helvetica, Arial, 'Apple Color Emoji', 'Segoe UI Emoji';
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+}
+
+.app {
+  min-height: 100dvh;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+}
+
+.appHeader {
+  padding: 28px 18px 12px;
+}
+
+.appHeaderInner {
+  max-width: 1080px;
+  margin: 0 auto;
+}
+
+.appTitleBlock {
+  display: grid;
+  gap: 10px;
+}
+
+.appTitle {
+  font-size: 26px;
+  letter-spacing: 0.2px;
+  margin: 0;
+}
+
+.appSubtitle {
+  margin: 0;
+  color: var(--text1);
+  max-width: 70ch;
+}
+
+.appMain {
+  width: 100%;
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 18px;
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 16px;
+}
+
+.panel {
+  border-radius: var(--radius);
+  background: var(--panel);
+  border: 1px solid var(--panelBorder);
+  box-shadow: var(--shadow);
+  padding: 16px;
+  min-height: 220px;
+}
+
+.panelTitle {
+  margin: 0 0 10px;
+  font-size: 14px;
+  font-family: var(--mono);
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text1);
+}
+
+.placeholder {
+  border-radius: calc(var(--radius) - 6px);
+  border: 1px dashed rgba(255, 255, 255, 0.18);
+  padding: 16px;
+  color: var(--text1);
+  line-height: 1.6;
+}
+
+.appFooter {
+  padding: 12px 18px 24px;
+  color: var(--text1);
+  text-align: center;
+}
+
+@media (max-width: 860px) {
+  .appMain {
+    grid-template-columns: 1fr;
+  }
+}
+
