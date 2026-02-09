@@ -1,4 +1,4 @@
-import { memo } from 'react'
+import { memo, type CSSProperties } from 'react'
 
 export type TileViewModel = {
   index: number
@@ -11,6 +11,8 @@ export type TileViewModel = {
   disabled: boolean
   tabIndex: number
   tileSizePx: number
+  tvRotDeg: number
+  tvBright: number
   ariaLabel: string
   onFocusIndex: (index: number) => void
   onReveal: (x: number, y: number, opts?: { chord?: boolean }) => void
@@ -31,6 +33,8 @@ function TileImpl(props: TileViewModel) {
     disabled,
     tabIndex,
     tileSizePx,
+    tvRotDeg,
+    tvBright,
     ariaLabel,
     onFocusIndex,
     onReveal,
@@ -62,7 +66,14 @@ function TileImpl(props: TileViewModel) {
       ref={(el) => setRef(index, el)}
       type="button"
       className={classes}
-      style={{ width: tileSizePx, height: tileSizePx }}
+      style={
+        {
+          width: tileSizePx,
+          height: tileSizePx,
+          ['--tv-rot' as string]: `${tvRotDeg}deg`,
+          ['--tv-bright' as string]: tvBright,
+        } as CSSProperties
+      }
       disabled={disabled}
       tabIndex={tabIndex}
       aria-label={ariaLabel}
@@ -90,4 +101,3 @@ function TileImpl(props: TileViewModel) {
 }
 
 export const Tile = memo(TileImpl)
-

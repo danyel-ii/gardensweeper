@@ -128,16 +128,16 @@ Acceptance:
 
 ## Milestone 5 — Patterns, textures, grain, and procedural variation (all optional)
 
-- [ ] Patterned tiles toggle:
+- [x] Patterned tiles toggle:
   - distinct patterns for unrevealed vs revealed
   - pattern intensity respects contrast rules
-- [ ] Texture overlay toggle + intensity slider:
+- [x] Texture overlay toggle + intensity slider:
   - apply subtle noise/grain overlay (generated or asset-based)
-- [ ] Procedural per-tile variation:
+- [x] Procedural per-tile variation:
   - deterministic per tile based on seed + coords
   - used for slight background-position/rotation/brightness variation
   - intensity slider controls strength
-- [ ] Vignette and board depth toggles:
+- [x] Vignette and board depth toggles:
   - vignette overlay
   - board shadow / raised frame
 

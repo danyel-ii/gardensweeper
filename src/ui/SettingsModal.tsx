@@ -163,6 +163,113 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
       </div>
 
       <div className="settingsSection">
+        <h3 className="settingsH3">Patterns & textures</h3>
+        <div className="settingsRow">
+          <label className="settingsLabel settingsToggle">
+            <input
+              type="checkbox"
+              checked={settings.patternsEnabled}
+              onChange={(e) =>
+                setSettings((s) => ({ ...s, patternsEnabled: e.target.checked }))
+              }
+            />
+            Patterned tiles
+          </label>
+
+          <label className="settingsLabel settingsToggle">
+            <input
+              type="checkbox"
+              checked={settings.textureEnabled}
+              onChange={(e) =>
+                setSettings((s) => ({ ...s, textureEnabled: e.target.checked }))
+              }
+            />
+            Texture overlay
+          </label>
+
+          <label className="settingsLabel settingsToggle">
+            <input
+              type="checkbox"
+              checked={settings.grainEnabled}
+              onChange={(e) =>
+                setSettings((s) => ({ ...s, grainEnabled: e.target.checked }))
+              }
+            />
+            Grain
+          </label>
+        </div>
+
+        <label className="settingsLabel">
+          Overlay intensity
+          <input
+            className="range"
+            type="range"
+            min={0}
+            max={1}
+            step={0.05}
+            value={settings.textureIntensity}
+            onChange={(e) =>
+              setSettings((s) => ({
+                ...s,
+                textureIntensity: clamp01(Number(e.target.value)),
+              }))
+            }
+          />
+        </label>
+
+        <label className="settingsLabel">
+          Procedural per-tile variation
+          <input
+            className="range"
+            type="range"
+            min={0}
+            max={1}
+            step={0.05}
+            value={settings.proceduralVariation}
+            onChange={(e) =>
+              setSettings((s) => ({
+                ...s,
+                proceduralVariation: clamp01(Number(e.target.value)),
+              }))
+            }
+          />
+        </label>
+      </div>
+
+      <div className="settingsSection">
+        <h3 className="settingsH3">Board</h3>
+        <div className="settingsRow">
+          <label className="settingsLabel settingsToggle">
+            <input
+              type="checkbox"
+              checked={settings.boardFrameEnabled}
+              onChange={(e) =>
+                setSettings((s) => ({
+                  ...s,
+                  boardFrameEnabled: e.target.checked,
+                }))
+              }
+            />
+            Board frame / depth
+          </label>
+
+          <label className="settingsLabel settingsToggle">
+            <input
+              type="checkbox"
+              checked={settings.vignetteEnabled}
+              onChange={(e) =>
+                setSettings((s) => ({
+                  ...s,
+                  vignetteEnabled: e.target.checked,
+                }))
+              }
+            />
+            Vignette
+          </label>
+        </div>
+      </div>
+
+      <div className="settingsSection">
         <h3 className="settingsH3">Motion</h3>
         <div className="settingsRow">
           <label className="settingsLabel">

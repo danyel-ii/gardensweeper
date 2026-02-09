@@ -3,7 +3,7 @@ export type Rng = {
   nextInt: (maxExclusive: number) => number
 }
 
-function hashStringToU32(input: string): number {
+export function hashStringToU32(input: string): number {
   // FNV-1a 32-bit
   let h = 0x811c9dc5
   for (let i = 0; i < input.length; i += 1) {
@@ -37,4 +37,3 @@ export function createRng(seed: string): Rng {
     },
   }
 }
-

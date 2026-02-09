@@ -2,6 +2,9 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 
 import type { GameState } from '../engine/game'
 import { indexToX, indexToY } from '../engine/grid'
+import { useSettings } from '../state/settings'
+import { hashU32, u32ToUnit } from '../utils/hash'
+import { hashStringToU32 } from '../utils/rng'
 import { Tile } from './Tile'
 
 type BoardProps = {
@@ -13,10 +16,14 @@ type BoardProps = {
 }
 
 export function Board({ game, tileSizePx, onReveal, onFlag, onChord }: BoardProps) {
+  const { settings } = useSettings()
   const width = game.config.width
   const height = game.config.height
   const total = width * height
   const disabled = game.status !== 'playing'
+  const variation = settings.proceduralVariation
+
+  const seedU32 = useMemo(() => hashStringToU32(game.config.seed), [game.config.seed])
 
   const [focusIndex, setFocusIndex] = useState(0)
   const tileRefs = useRef<Array<HTMLButtonElement | null>>([])
@@ -117,6 +124,19 @@ export function Board({ game, tileSizePx, onReveal, onFlag, onChord }: BoardProp
               ? 'Flagged'
               : 'Hidden'
 
+          let tvRotDeg = 0
+          let tvBright = 1
+          if (variation > 0) {
+            const base =
+              seedU32 ^
+              Math.imul(x + 1, 0x9e3779b1) ^
+              Math.imul(y + 1, 0x85ebca6b)
+            const u1 = u32ToUnit(hashU32(base))
+            const u2 = u32ToUnit(hashU32(base ^ 0x27d4eb2d))
+            tvRotDeg = (u1 * 2 - 1) * (1.15 * variation)
+            tvBright = 1 + (u2 * 2 - 1) * (0.06 * variation)
+          }
+
           return (
             <Tile
               key={index}
@@ -130,6 +150,8 @@ export function Board({ game, tileSizePx, onReveal, onFlag, onChord }: BoardProp
               disabled={disabled}
               tabIndex={index === focusIndex ? 0 : -1}
               tileSizePx={tileSizePx}
+              tvRotDeg={tvRotDeg}
+              tvBright={tvBright}
               ariaLabel={ariaLabel}
               onFocusIndex={setFocusIndex}
               onReveal={onReveal}
@@ -143,4 +165,3 @@ export function Board({ game, tileSizePx, onReveal, onFlag, onChord }: BoardProp
     </div>
   )
 }
-

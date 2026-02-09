@@ -31,15 +31,23 @@
   --tileFlagBorder: rgba(125, 211, 252, 0.35);
   --tileMineBg: rgba(220, 38, 38, 0.22);
   --tileMineBorder: rgba(220, 38, 38, 0.5);
+  --boardShadow: 0 14px 44px rgba(0, 0, 0, 0.35);
+  --vignetteOpacity: 0.38;
+  --textureInk: rgba(255, 255, 255, 0.08);
+  --patternInk: rgba(255, 255, 255, 0.09);
   --overlay: rgba(0, 0, 0, 0.62);
   --modalBg: rgba(16, 22, 32, 0.92);
   --shadowModal: 0 22px 80px rgba(0, 0, 0, 0.55);
+  --numberOutlineShadow: 0 1px 0 rgba(0, 0, 0, 0.65),
+    0 0 12px rgba(0, 0, 0, 0.4);
   --labelSoft: rgba(255, 255, 255, 0.62);
   --titleSoft: rgba(255, 255, 255, 0.78);
   --dashed: rgba(255, 255, 255, 0.18);
   --animFast: 120ms;
   --animSlow: 220ms;
   --tileFontSize: 14px;
+  --textureIntensity: 0.2;
+  --proceduralVariationIntensity: 0;
   --n1: #60a5fa;
   --n2: #22c55e;
   --n3: #ef4444;
@@ -83,6 +91,12 @@
   --overlay: rgba(0, 0, 0, 0.46);
   --modalBg: rgba(245, 247, 251, 0.94);
   --shadowModal: 0 22px 80px rgba(0, 0, 0, 0.22);
+  --boardShadow: 0 18px 56px rgba(0, 0, 0, 0.18);
+  --vignetteOpacity: 0.22;
+  --textureInk: rgba(0, 0, 0, 0.06);
+  --patternInk: rgba(0, 0, 0, 0.06);
+  --numberOutlineShadow: 0 1px 0 rgba(255, 255, 255, 0.85),
+    0 0 8px rgba(255, 255, 255, 0.6);
   --labelSoft: rgba(0, 0, 0, 0.62);
   --titleSoft: rgba(0, 0, 0, 0.78);
   --dashed: rgba(0, 0, 0, 0.18);
@@ -94,10 +108,9 @@
   --tileFontSize: 16px;
 }
 
-:root[data-high-contrast-numbers='on'] .tileContent {
-  text-shadow:
-    0 1px 0 rgba(0, 0, 0, 0.65),
-    0 0 12px rgba(0, 0, 0, 0.4);
+:root[data-high-contrast-numbers='on'] .tileContent,
+:root[data-number-outline='on'] .tileContent {
+  text-shadow: var(--numberOutlineShadow);
 }
 
 * {
@@ -125,6 +138,78 @@ a:hover {
   min-height: 100dvh;
   display: grid;
   grid-template-rows: auto 1fr auto;
+  position: relative;
+  isolation: isolate;
+}
+
+.app::before,
+.app::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.app::before {
+  opacity: 0;
+  background-repeat: repeat;
+}
+
+:root[data-texture='on'][data-grain='off'] .app::before {
+  opacity: calc(var(--textureIntensity) * 0.22);
+  background-image: repeating-linear-gradient(
+      45deg,
+      var(--textureInk) 0 1px,
+      transparent 1px 10px
+    ),
+    repeating-linear-gradient(
+      135deg,
+      var(--textureInk) 0 1px,
+      transparent 1px 10px
+    );
+}
+
+:root[data-texture='off'][data-grain='on'] .app::before {
+  opacity: calc(var(--textureIntensity) * 0.22);
+  background-image: url('../assets/noise.svg');
+  background-size: 128px 128px;
+}
+
+:root[data-texture='on'][data-grain='on'] .app::before {
+  opacity: calc(var(--textureIntensity) * 0.22);
+  background-image: repeating-linear-gradient(
+      45deg,
+      var(--textureInk) 0 1px,
+      transparent 1px 10px
+    ),
+    repeating-linear-gradient(
+      135deg,
+      var(--textureInk) 0 1px,
+      transparent 1px 10px
+    ),
+    url('../assets/noise.svg');
+  background-size: auto, auto, 128px 128px;
+}
+
+.app::after {
+  opacity: 0;
+}
+
+:root[data-vignette='on'] .app::after {
+  opacity: var(--vignetteOpacity);
+  background: radial-gradient(
+    1200px 900px at 50% 30%,
+    transparent 52%,
+    rgba(0, 0, 0, 0.72) 100%
+  );
+}
+
+.appHeader,
+.appMain,
+.appFooter {
+  position: relative;
+  z-index: 1;
 }
 
 .appHeader {
@@ -322,6 +407,14 @@ a:hover {
   border-radius: 14px;
   background: var(--boardFrameBg);
   border: 1px solid var(--boardFrameBorder);
+  box-shadow: var(--boardShadow);
+}
+
+:root[data-board-frame='off'] .boardGrid {
+  padding: 0;
+  background: transparent;
+  border: none;
+  box-shadow: none;
 }
 
 .tile {
@@ -335,10 +428,46 @@ a:hover {
   padding: 0;
   cursor: pointer;
   user-select: none;
+  position: relative;
+  --tilePress: 0px;
+  --tv-rot: 0deg;
+  --tv-bright: 1;
+  transform: rotate(var(--tv-rot)) translateY(var(--tilePress));
+  filter: brightness(var(--tv-bright));
   transition:
     transform var(--animFast) ease,
     background var(--animFast) ease,
     border-color var(--animFast) ease;
+}
+
+.tile::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+
+:root[data-patterns='on'] .tile.hidden::after {
+  opacity: 0.16;
+  background-image: repeating-linear-gradient(
+    45deg,
+    var(--patternInk) 0 1px,
+    transparent 1px 6px
+  );
+}
+
+:root[data-patterns='on'] .tile.revealed::after {
+  opacity: 0.1;
+  background-image: radial-gradient(
+    circle at 1px 1px,
+    var(--patternInk) 1px,
+    transparent 0
+  );
+  background-size: 10px 10px;
+  background-repeat: repeat;
 }
 
 .tile.hidden:hover {
@@ -347,7 +476,7 @@ a:hover {
 }
 
 .tile.hidden:active {
-  transform: translateY(1px);
+  --tilePress: 1px;
 }
 
 .tile.revealed {
@@ -375,6 +504,8 @@ a:hover {
   font-size: var(--tileFontSize);
   font-weight: 800;
   line-height: 1;
+  position: relative;
+  z-index: 2;
 }
 
 .n1 {

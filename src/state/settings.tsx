@@ -333,6 +333,18 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
       settings.animationsEnabled && !effectiveReduceMotion ? 'on' : 'off'
     root.dataset.largeNumbers = settings.largeNumbers ? 'on' : 'off'
     root.dataset.highContrastNumbers = settings.highContrastNumbers ? 'on' : 'off'
+    root.dataset.patterns = settings.patternsEnabled ? 'on' : 'off'
+    root.dataset.texture = settings.textureEnabled ? 'on' : 'off'
+    root.dataset.grain = settings.grainEnabled ? 'on' : 'off'
+    root.dataset.vignette = settings.vignetteEnabled ? 'on' : 'off'
+    root.dataset.boardFrame = settings.boardFrameEnabled ? 'on' : 'off'
+
+    const needsOutline =
+      settings.highContrastNumbers ||
+      settings.patternsEnabled ||
+      settings.textureEnabled ||
+      settings.grainEnabled
+    root.dataset.numberOutline = needsOutline ? 'on' : 'off'
 
     // Theme pack -> CSS vars
     const pack = getThemePack(settings.themePackId)
@@ -344,6 +356,12 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     const anim = settings.animationsEnabled && !effectiveReduceMotion ? settings.animationIntensity : 0
     root.style.setProperty('--animFast', `${Math.round(120 * anim)}ms`)
     root.style.setProperty('--animSlow', `${Math.round(220 * anim)}ms`)
+
+    root.style.setProperty('--textureIntensity', String(clamp01(settings.textureIntensity, 0.2)))
+    root.style.setProperty(
+      '--proceduralVariationIntensity',
+      String(clamp01(settings.proceduralVariation, 0)),
+    )
   }, [settings, effectiveColorScheme, effectiveReduceMotion])
 
   const value: SettingsContextValue = {
@@ -362,4 +380,3 @@ export function useSettings(): SettingsContextValue {
   if (!ctx) throw new Error('useSettings must be used within SettingsProvider')
   return ctx
 }
-
