@@ -548,6 +548,80 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
       </div>
 
       <div className="settingsSection">
+        <h3 className="settingsH3">Audio & haptics</h3>
+        <div className="settingsRow">
+          <label className="settingsLabel settingsToggle">
+            <input
+              type="checkbox"
+              checked={settings.sfxEnabled}
+              onChange={(e) =>
+                setSettings((s) => ({ ...s, sfxEnabled: e.target.checked }))
+              }
+            />
+            SFX
+          </label>
+
+          <label className="settingsLabel settingsToggle">
+            <input
+              type="checkbox"
+              checked={settings.ambienceEnabled}
+              onChange={(e) =>
+                setSettings((s) => ({ ...s, ambienceEnabled: e.target.checked }))
+              }
+            />
+            Ambience
+          </label>
+
+          <label className="settingsLabel settingsToggle">
+            <input
+              type="checkbox"
+              checked={settings.hapticsEnabled}
+              onChange={(e) =>
+                setSettings((s) => ({ ...s, hapticsEnabled: e.target.checked }))
+              }
+            />
+            Haptics
+          </label>
+        </div>
+
+        <label className="settingsLabel">
+          SFX volume
+          <input
+            className="range"
+            type="range"
+            min={0}
+            max={1}
+            step={0.05}
+            value={settings.sfxVolume}
+            onChange={(e) =>
+              setSettings((s) => ({
+                ...s,
+                sfxVolume: clamp01(Number(e.target.value)),
+              }))
+            }
+          />
+        </label>
+
+        <label className="settingsLabel">
+          Ambience volume
+          <input
+            className="range"
+            type="range"
+            min={0}
+            max={1}
+            step={0.05}
+            value={settings.ambienceVolume}
+            onChange={(e) =>
+              setSettings((s) => ({
+                ...s,
+                ambienceVolume: clamp01(Number(e.target.value)),
+              }))
+            }
+          />
+        </label>
+      </div>
+
+      <div className="settingsSection">
         <h3 className="settingsH3">Personalization</h3>
         <div className="settingsRow">
           <label className="settingsLabel settingsToggle">

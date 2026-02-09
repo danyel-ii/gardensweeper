@@ -1,9 +1,11 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 
 import type { BoardSpec } from '../engine/board'
 import { revealCell } from '../engine/game'
 import { chord, createNewGame, toggleFlag, type GameState } from '../engine/game'
 import { PRESETS, type DifficultyId } from '../state/presets'
+import { useSettings } from '../state/settings'
+import { loadStats, recordWin, saveStats, type DifficultyKey } from '../state/stats'
 import { randomSeed } from '../utils/seed'
 import { Board } from './Board'
 import { CustomGameModal } from './CustomGameModal'
@@ -12,7 +14,7 @@ import { Hud } from './Hud'
 import { Modal } from './Modal'
 import { SettingsModal } from './SettingsModal'
 import { StatsModal } from './StatsModal'
-import { loadStats, recordWin, saveStats, type DifficultyKey } from '../state/stats'
+import { useAudio } from './useAudio'
 
 function nowMs(): number {
   return Date.now()
@@ -38,6 +40,13 @@ function computeTileSizePx(width: number): number {
 }
 
 export default function App() {
+  const { settings, setSettings } = useSettings()
+  const { playSfx, haptic } = useAudio(settings)
+  const prevGameRef = useRef<GameState | null>(null)
+  const prevMuteRef = useRef<{ sfxEnabled: boolean; ambienceEnabled: boolean } | null>(
+    null,
+  )
+
   const [difficulty, setDifficulty] = useState<DifficultyId>('beginner')
   const [spec, setSpec] = useState<BoardSpec>(() => PRESETS[0]!.spec)
 
@@ -63,6 +72,40 @@ export default function App() {
   const minesRemaining = game.config.mineCount - game.flagsCount
   const elapsedSeconds = computeElapsedSeconds(game, tMs)
   const tileSizePx = computeTileSizePx(game.config.width)
+
+  useEffect(() => {
+    const prev = prevGameRef.current
+    prevGameRef.current = game
+    if (!prev) return
+
+    const sameGame =
+      prev.config.seed === game.config.seed &&
+      prev.config.width === game.config.width &&
+      prev.config.height === game.config.height &&
+      prev.config.mineCount === game.config.mineCount
+    if (!sameGame) return
+
+    if (prev.status === 'playing' && game.status === 'won') {
+      playSfx('win')
+      haptic('win')
+      return
+    }
+    if (prev.status === 'playing' && game.status === 'lost') {
+      playSfx('lose')
+      haptic('lose')
+      return
+    }
+
+    if (game.flagsCount > prev.flagsCount) {
+      playSfx('flag')
+      haptic('flag')
+      return
+    }
+    if (game.revealedCount > prev.revealedCount) {
+      playSfx('reveal')
+      haptic('reveal')
+    }
+  }, [game, playSfx, haptic])
 
   useEffect(() => {
     saveStats(stats)
@@ -94,6 +137,28 @@ export default function App() {
           target.tagName === 'TEXTAREA' ||
           target.isContentEditable)
       if (typing) return
+
+      if (e.key === 'm' || e.key === 'M') {
+        e.preventDefault()
+        setSettings((s) => {
+          const muted = !s.sfxEnabled && !s.ambienceEnabled
+          if (!muted) {
+            prevMuteRef.current = {
+              sfxEnabled: s.sfxEnabled,
+              ambienceEnabled: s.ambienceEnabled,
+            }
+            return { ...s, sfxEnabled: false, ambienceEnabled: false }
+          }
+          const prevAudio = prevMuteRef.current
+          prevMuteRef.current = null
+          return {
+            ...s,
+            sfxEnabled: prevAudio?.sfxEnabled ?? true,
+            ambienceEnabled: prevAudio?.ambienceEnabled ?? false,
+          }
+        })
+        return
+      }
 
       if (e.key === 'r' || e.key === 'R') {
         e.preventDefault()
@@ -131,7 +196,7 @@ export default function App() {
 
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
-  }, [spec])
+  }, [spec, setSettings])
 
   const startNewGame = (nextSpec: BoardSpec, nextDifficulty: DifficultyId) => {
     setDifficulty(nextDifficulty)

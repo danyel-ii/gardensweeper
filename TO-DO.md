@@ -215,10 +215,10 @@ Acceptance:
 
 ## Milestone 10 — Ambience: SFX, ambient loop, haptics (optional)
 
-- [ ] SFX toggle + volume
-- [ ] Ambient loop toggle + volume (synth or bundled audio with license)
-- [ ] Haptics toggle on supported devices (`navigator.vibrate`)
-- [ ] Mute shortcut (e.g. M)
+- [x] SFX toggle + volume
+- [x] Ambient loop toggle + volume (synth or bundled audio with license)
+- [x] Haptics toggle on supported devices (`navigator.vibrate`)
+- [x] Mute shortcut (e.g. M)
 
 Acceptance:
 - Sound never auto-blasts; defaults are gentle; everything is user-controlled.

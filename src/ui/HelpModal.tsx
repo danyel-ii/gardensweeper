@@ -57,6 +57,9 @@ export function HelpModal({ open, onClose }: HelpModalProps) {
             <li>
               <span className="helpKey">1 / 2 / 3</span> presets
             </li>
+            <li>
+              <span className="helpKey">M</span> mute/unmute
+            </li>
           </ul>
         </div>
 
