@@ -377,6 +377,10 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     root.dataset.vignette = settings.vignetteEnabled ? 'on' : 'off'
     root.dataset.boardFrame = settings.boardFrameEnabled ? 'on' : 'off'
     root.dataset.hudStyle = settings.hudStyle
+    root.dataset.themePack = settings.themePackId
+    root.dataset.customCursor = settings.customCursorEnabled ? 'on' : 'off'
+    root.dataset.hoverHighlight = settings.hoverHighlightEnabled ? 'on' : 'off'
+    root.dataset.chordPreview = settings.chordPreviewEnabled ? 'on' : 'off'
     root.dataset.numberStyle = settings.numberStyle
     root.dataset.glyphMode = settings.glyphModeEnabled ? 'on' : 'off'
     root.dataset.pressFeedback =

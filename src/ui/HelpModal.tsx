@@ -63,12 +63,11 @@ export function HelpModal({ open, onClose }: HelpModalProps) {
         <div className="helpBlock">
           <h3 className="helpH3">Touch</h3>
           <p className="helpP">
-            Tap to reveal. Long-press to flag. (Touch gestures are expanded in
-            later milestones.)
+            Tap to reveal. Long-press to flag. Two-finger tap on a revealed
+            number to chord.
           </p>
         </div>
       </div>
     </Modal>
   )
 }
-

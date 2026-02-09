@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 
 import type { GameState } from '../engine/game'
-import { indexToX, indexToY } from '../engine/grid'
+import { indexToX, indexToY, neighborIndices } from '../engine/grid'
 import { useSettings } from '../state/settings'
 import { hashU32, u32ToUnit } from '../utils/hash'
 import { hashStringToU32 } from '../utils/rng'
@@ -40,6 +40,8 @@ export function Board({
   const seedU32 = useMemo(() => hashStringToU32(game.config.seed), [game.config.seed])
 
   const [focusIndex, setFocusIndex] = useState(0)
+  const [hoverIndex, setHoverIndex] = useState<number | null>(null)
+  const [shiftDown, setShiftDown] = useState(false)
   const tileRefs = useRef<Array<HTMLButtonElement | null>>([])
 
   useEffect(() => {
@@ -55,7 +57,51 @@ export function Board({
   useEffect(() => {
     // Reset focus on new games.
     setFocusIndex(0)
+    setHoverIndex(null)
   }, [game.config.seed, width, height, game.config.mineCount])
+
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Shift') setShiftDown(true)
+    }
+    const onKeyUp = (e: KeyboardEvent) => {
+      if (e.key === 'Shift') setShiftDown(false)
+    }
+    const onBlur = () => setShiftDown(false)
+    window.addEventListener('keydown', onKeyDown)
+    window.addEventListener('keyup', onKeyUp)
+    window.addEventListener('blur', onBlur)
+    return () => {
+      window.removeEventListener('keydown', onKeyDown)
+      window.removeEventListener('keyup', onKeyUp)
+      window.removeEventListener('blur', onBlur)
+    }
+  }, [])
+
+  const chordPreviewSet = useMemo(() => {
+    if (!settings.chordPreviewEnabled) return null
+    if (!shiftDown) return null
+    const origin = hoverIndex ?? focusIndex
+    if (game.revealed[origin] !== 1) return null
+    if (game.board.adjacentMineCounts[origin] === 0) return null
+    const out = new Set<number>()
+    for (const n of neighborIndices(width, height, origin)) {
+      if (game.revealed[n] === 1) continue
+      if (game.flagged[n] === 1) continue
+      out.add(n)
+    }
+    return out
+  }, [
+    settings.chordPreviewEnabled,
+    shiftDown,
+    hoverIndex,
+    focusIndex,
+    game.revealed,
+    game.flagged,
+    game.board.adjacentMineCounts,
+    width,
+    height,
+  ])
 
   const gridStyle = useMemo(
     () => ({
@@ -175,8 +221,10 @@ export function Board({
               tvBright={tvBright}
               revealDelayMs={revealDelayMs}
               glyphModeEnabled={settings.glyphModeEnabled}
+              chordPreview={chordPreviewSet?.has(index) ?? false}
               ariaLabel={ariaLabel}
               onFocusIndex={setFocusIndex}
+              onHoverIndex={setHoverIndex}
               onReveal={onReveal}
               onFlag={onFlag}
               onChord={onChord}

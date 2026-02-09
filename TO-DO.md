@@ -201,10 +201,10 @@ Acceptance:
 
 ## Milestone 9 — Cursor + interaction polish (optional)
 
-- [ ] Custom cursor sets per theme (desktop only; fallback safe).
-- [ ] Hover highlight toggle
-- [ ] Chord preview toggle (soft highlight of neighbors when holding chord gesture)
-- [ ] Touch gestures:
+- [x] Custom cursor sets per theme (desktop only; fallback safe).
+- [x] Hover highlight toggle
+- [x] Chord preview toggle (soft highlight of neighbors when holding chord gesture)
+- [x] Touch gestures:
   - long-press to flag
   - optional chord gesture that is discoverable in Help
 

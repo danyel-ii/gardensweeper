@@ -344,6 +344,53 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
       </div>
 
       <div className="settingsSection">
+        <h3 className="settingsH3">Cursor & interaction</h3>
+        <div className="settingsRow">
+          <label className="settingsLabel settingsToggle">
+            <input
+              type="checkbox"
+              checked={settings.customCursorEnabled}
+              onChange={(e) =>
+                setSettings((s) => ({
+                  ...s,
+                  customCursorEnabled: e.target.checked,
+                }))
+              }
+            />
+            Custom cursor (desktop)
+          </label>
+
+          <label className="settingsLabel settingsToggle">
+            <input
+              type="checkbox"
+              checked={settings.hoverHighlightEnabled}
+              onChange={(e) =>
+                setSettings((s) => ({
+                  ...s,
+                  hoverHighlightEnabled: e.target.checked,
+                }))
+              }
+            />
+            Hover highlight
+          </label>
+
+          <label className="settingsLabel settingsToggle">
+            <input
+              type="checkbox"
+              checked={settings.chordPreviewEnabled}
+              onChange={(e) =>
+                setSettings((s) => ({
+                  ...s,
+                  chordPreviewEnabled: e.target.checked,
+                }))
+              }
+            />
+            Chord preview (Shift)
+          </label>
+        </div>
+      </div>
+
+      <div className="settingsSection">
         <h3 className="settingsH3">Motion</h3>
         <div className="settingsRow">
           <label className="settingsLabel">

@@ -516,6 +516,7 @@ a:hover {
   cursor: pointer;
   user-select: none;
   position: relative;
+  touch-action: manipulation;
   --tilePress: 0px;
   --tv-rot: 0deg;
   --tv-bright: 1;
@@ -557,7 +558,12 @@ a:hover {
   background-repeat: repeat;
 }
 
-.tile.hidden:hover {
+:root[data-chord-preview='on'] .tile.chordPreview {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+:root[data-hover-highlight='on'] .tile.hidden:hover {
   background: var(--tileHiddenHoverBg);
   border-color: var(--tileBorderHover);
 }
@@ -713,6 +719,28 @@ a:hover {
 }
 .n8 {
   color: var(--n8);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  :root[data-custom-cursor='on'][data-theme-pack='minimal'] .boardGrid,
+  :root[data-custom-cursor='on'][data-theme-pack='minimal'] .tile.hidden {
+    cursor: url('../assets/cursors/minimal.svg') 16 16, pointer;
+  }
+
+  :root[data-custom-cursor='on'][data-theme-pack='stained-glass'] .boardGrid,
+  :root[data-custom-cursor='on'][data-theme-pack='stained-glass'] .tile.hidden {
+    cursor: url('../assets/cursors/stained-glass.svg') 16 16, pointer;
+  }
+
+  :root[data-custom-cursor='on'][data-theme-pack='kintsugi-ceramic'] .boardGrid,
+  :root[data-custom-cursor='on'][data-theme-pack='kintsugi-ceramic'] .tile.hidden {
+    cursor: url('../assets/cursors/kintsugi.svg') 16 16, pointer;
+  }
+
+  :root[data-custom-cursor='on'][data-theme-pack='botanical-field-notes'] .boardGrid,
+  :root[data-custom-cursor='on'][data-theme-pack='botanical-field-notes'] .tile.hidden {
+    cursor: url('../assets/cursors/botanical.svg') 16 16, pointer;
+  }
 }
 
 .sidePanel .panelTitle {
