@@ -138,19 +138,18 @@ export function AmbienceP5() {
           p.push()
           p.translate(pt.x, pt.y)
           p.rotate(pt.rot)
+          const s = pt.size
+          // p5 v2 changed bezierVertex semantics; keep petals simple and robust.
           p.noStroke()
           p.fill(pt.color.r, pt.color.g, pt.color.b, pt.alpha)
-          const s = pt.size
-          p.beginShape()
-          p.vertex(0, -s * 0.65)
-          p.bezierVertex(s * 0.55, -s * 0.25, s * 0.35, s * 0.65, 0, s * 0.75)
-          p.bezierVertex(-s * 0.35, s * 0.65, -s * 0.55, -s * 0.25, 0, -s * 0.65)
-          p.endShape(p.CLOSE)
+          p.ellipse(0, 0, s * 0.92, s * 1.35)
+          p.fill(255, 255, 255, Math.min(56, Math.round(pt.alpha * 0.45)))
+          p.ellipse(0, -s * 0.22, s * 0.42, s * 0.52)
 
           p.stroke(255, 255, 255, 54)
           p.strokeWeight(1)
           p.noFill()
-          p.line(0, -s * 0.5, 0, s * 0.55)
+          p.line(0, -s * 0.58, 0, s * 0.58)
           p.pop()
         }
 
