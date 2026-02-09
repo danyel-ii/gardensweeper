@@ -167,13 +167,13 @@ Acceptance:
 
 ## Milestone 7 — Micro-animations and win/lose moments (all optional)
 
-- [ ] Press feedback animation (toggle)
-- [ ] Reveal animation (toggle)
-- [ ] Flood-fill cascade animation (toggle)
-- [ ] Flag placement animation (toggle)
-- [ ] Win moment animation (toggle)
-- [ ] Lose moment animation (toggle)
-- [ ] Reduce motion:
+- [x] Press feedback animation (toggle)
+- [x] Reveal animation (toggle)
+- [x] Flood-fill cascade animation (toggle)
+- [x] Flag placement animation (toggle)
+- [x] Win moment animation (toggle)
+- [x] Lose moment animation (toggle)
+- [x] Reduce motion:
   - when reduce motion is on, disable/shorten animations globally
 
 Acceptance:

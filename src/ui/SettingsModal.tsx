@@ -356,6 +356,108 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
           </label>
         </div>
 
+        <div className="settingsRow">
+          <label className="settingsLabel settingsToggle">
+            <input
+              type="checkbox"
+              checked={settings.pressFeedbackEnabled}
+              onChange={(e) =>
+                setSettings((s) => ({
+                  ...s,
+                  pressFeedbackEnabled: e.target.checked,
+                }))
+              }
+            />
+            Press feedback
+          </label>
+
+          <label className="settingsLabel settingsToggle">
+            <input
+              type="checkbox"
+              checked={settings.revealAnimationEnabled}
+              onChange={(e) =>
+                setSettings((s) => ({
+                  ...s,
+                  revealAnimationEnabled: e.target.checked,
+                }))
+              }
+            />
+            Reveal
+          </label>
+
+          <label className="settingsLabel settingsToggle">
+            <input
+              type="checkbox"
+              checked={settings.flagPlacementAnimationEnabled}
+              onChange={(e) =>
+                setSettings((s) => ({
+                  ...s,
+                  flagPlacementAnimationEnabled: e.target.checked,
+                }))
+              }
+            />
+            Flag placement
+          </label>
+
+          <label className="settingsLabel settingsToggle">
+            <input
+              type="checkbox"
+              checked={settings.floodWaveEnabled}
+              onChange={(e) =>
+                setSettings((s) => ({
+                  ...s,
+                  floodWaveEnabled: e.target.checked,
+                }))
+              }
+            />
+            Flood cascade
+          </label>
+        </div>
+
+        <div className="settingsRow">
+          <label className="settingsLabel settingsToggle">
+            <input
+              type="checkbox"
+              checked={settings.winLossAnimationsEnabled}
+              onChange={(e) =>
+                setSettings((s) => ({
+                  ...s,
+                  winLossAnimationsEnabled: e.target.checked,
+                }))
+              }
+            />
+            Win/Lose moments
+          </label>
+
+          <label className="settingsLabel settingsToggle">
+            <input
+              type="checkbox"
+              checked={settings.winAnimationEnabled}
+              onChange={(e) =>
+                setSettings((s) => ({
+                  ...s,
+                  winAnimationEnabled: e.target.checked,
+                }))
+              }
+            />
+            Win moment
+          </label>
+
+          <label className="settingsLabel settingsToggle">
+            <input
+              type="checkbox"
+              checked={settings.loseAnimationEnabled}
+              onChange={(e) =>
+                setSettings((s) => ({
+                  ...s,
+                  loseAnimationEnabled: e.target.checked,
+                }))
+              }
+            />
+            Lose moment
+          </label>
+        </div>
+
         <label className="settingsLabel">
           Animation intensity
           <input

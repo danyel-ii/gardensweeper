@@ -15,6 +15,7 @@ export type TileViewModel = {
   tileSizePx: number
   tvRotDeg: number
   tvBright: number
+  revealDelayMs: number
   glyphModeEnabled: boolean
   ariaLabel: string
   onFocusIndex: (index: number) => void
@@ -38,6 +39,7 @@ function TileImpl(props: TileViewModel) {
     tileSizePx,
     tvRotDeg,
     tvBright,
+    revealDelayMs,
     glyphModeEnabled,
     ariaLabel,
     onFocusIndex,
@@ -78,6 +80,7 @@ function TileImpl(props: TileViewModel) {
           height: tileSizePx,
           ['--tv-rot' as string]: `${tvRotDeg}deg`,
           ['--tv-bright' as string]: tvBright,
+          ['--reveal-delay' as string]: `${revealDelayMs}ms`,
         } as CSSProperties
       }
       disabled={disabled}

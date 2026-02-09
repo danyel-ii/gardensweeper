@@ -11,7 +11,7 @@ export type BackgroundStyle = 'flat' | 'wallpaper' | 'illustration'
 export type NumberStyle = 'classic' | 'outlined' | 'engraved' | 'ink'
 
 export type Settings = {
-  version: 1
+  version: 2
 
   // Theme
   themePackId: string
@@ -35,8 +35,12 @@ export type Settings = {
   // Motion
   animationsEnabled: boolean
   animationIntensity: number // 0..1
+  revealAnimationEnabled: boolean
+  flagPlacementAnimationEnabled: boolean
   floodWaveEnabled: boolean
   winLossAnimationsEnabled: boolean
+  winAnimationEnabled: boolean
+  loseAnimationEnabled: boolean
   reduceMotionMode: ReduceMotionSetting
 
   // HUD & layout
@@ -64,7 +68,7 @@ export type Settings = {
   showThemePreviews: boolean
 }
 
-const SETTINGS_VERSION = 1 as const
+const SETTINGS_VERSION = 2 as const
 const STORAGE_KEY = 'minesweeper_studio_settings'
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -88,8 +92,12 @@ export const DEFAULT_SETTINGS: Settings = {
 
   animationsEnabled: true,
   animationIntensity: 0.75,
+  revealAnimationEnabled: true,
+  flagPlacementAnimationEnabled: true,
   floodWaveEnabled: true,
   winLossAnimationsEnabled: true,
+  winAnimationEnabled: true,
+  loseAnimationEnabled: true,
   reduceMotionMode: 'auto',
 
   hudStyle: 'minimal',
@@ -191,6 +199,14 @@ function migrate(raw: unknown): Settings {
         ? r.animationsEnabled
         : DEFAULT_SETTINGS.animationsEnabled,
     animationIntensity: clamp01(r.animationIntensity, DEFAULT_SETTINGS.animationIntensity),
+    revealAnimationEnabled:
+      typeof r.revealAnimationEnabled === 'boolean'
+        ? r.revealAnimationEnabled
+        : DEFAULT_SETTINGS.revealAnimationEnabled,
+    flagPlacementAnimationEnabled:
+      typeof r.flagPlacementAnimationEnabled === 'boolean'
+        ? r.flagPlacementAnimationEnabled
+        : DEFAULT_SETTINGS.flagPlacementAnimationEnabled,
     floodWaveEnabled:
       typeof r.floodWaveEnabled === 'boolean'
         ? r.floodWaveEnabled
@@ -199,6 +215,14 @@ function migrate(raw: unknown): Settings {
       typeof r.winLossAnimationsEnabled === 'boolean'
         ? r.winLossAnimationsEnabled
         : DEFAULT_SETTINGS.winLossAnimationsEnabled,
+    winAnimationEnabled:
+      typeof r.winAnimationEnabled === 'boolean'
+        ? r.winAnimationEnabled
+        : DEFAULT_SETTINGS.winAnimationEnabled,
+    loseAnimationEnabled:
+      typeof r.loseAnimationEnabled === 'boolean'
+        ? r.loseAnimationEnabled
+        : DEFAULT_SETTINGS.loseAnimationEnabled,
     reduceMotionMode: isOneOf(r.reduceMotionMode, ['auto', 'on', 'off'] as const)
       ? r.reduceMotionMode
       : DEFAULT_SETTINGS.reduceMotionMode,
@@ -343,8 +367,8 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     const root = document.documentElement
     root.dataset.colorScheme = effectiveColorScheme
     root.dataset.reduceMotion = effectiveReduceMotion ? 'on' : 'off'
-    root.dataset.animations =
-      settings.animationsEnabled && !effectiveReduceMotion ? 'on' : 'off'
+    const motionOn = settings.animationsEnabled && !effectiveReduceMotion
+    root.dataset.animations = motionOn ? 'on' : 'off'
     root.dataset.largeNumbers = settings.largeNumbers ? 'on' : 'off'
     root.dataset.highContrastNumbers = settings.highContrastNumbers ? 'on' : 'off'
     root.dataset.patterns = settings.patternsEnabled ? 'on' : 'off'
@@ -354,6 +378,25 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     root.dataset.boardFrame = settings.boardFrameEnabled ? 'on' : 'off'
     root.dataset.numberStyle = settings.numberStyle
     root.dataset.glyphMode = settings.glyphModeEnabled ? 'on' : 'off'
+    root.dataset.pressFeedback =
+      motionOn && settings.pressFeedbackEnabled ? 'on' : 'off'
+    root.dataset.revealAnim =
+      motionOn && settings.revealAnimationEnabled ? 'on' : 'off'
+    root.dataset.flagAnim =
+      motionOn && settings.flagPlacementAnimationEnabled ? 'on' : 'off'
+    root.dataset.floodWave = motionOn && settings.floodWaveEnabled ? 'on' : 'off'
+    root.dataset.winAnim =
+      motionOn &&
+      settings.winLossAnimationsEnabled &&
+      settings.winAnimationEnabled
+        ? 'on'
+        : 'off'
+    root.dataset.loseAnim =
+      motionOn &&
+      settings.winLossAnimationsEnabled &&
+      settings.loseAnimationEnabled
+        ? 'on'
+        : 'off'
 
     const needsOutline =
       settings.highContrastNumbers ||

@@ -52,6 +52,7 @@
   --tileFontSize: 14px;
   --textureIntensity: 0.2;
   --proceduralVariationIntensity: 0;
+  --pressY: 1px;
   --n1: #60a5fa;
   --n2: #22c55e;
   --n3: #ef4444;
@@ -113,6 +114,10 @@
 
 :root[data-large-numbers='on'] {
   --tileFontSize: 16px;
+}
+
+:root[data-press-feedback='off'] {
+  --pressY: 0px;
 }
 
 :root[data-high-contrast-numbers='on'] .tileContent,
@@ -325,7 +330,7 @@ a:hover {
   border-color: var(--lineHover);
 }
 .btn:active {
-  transform: translateY(1px);
+  transform: translateY(var(--pressY));
 }
 .btn:disabled {
   opacity: 0.55;
@@ -415,6 +420,32 @@ a:hover {
   background: var(--boardFrameBg);
   border: 1px solid var(--boardFrameBorder);
   box-shadow: var(--boardShadow);
+  position: relative;
+  overflow: hidden;
+}
+
+:root[data-win-anim='on'] [data-game-status='won'] .boardGrid::after {
+  animation: winSheen 900ms ease-out;
+}
+
+.boardGrid::after {
+  content: '';
+  position: absolute;
+  inset: -6px;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateX(-120%);
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.18) 48%,
+    transparent 100%
+  );
+}
+
+:root[data-lose-anim='on'] [data-game-status='lost'] .boardGrid {
+  animation: loseShake 320ms ease-in-out;
 }
 
 :root[data-board-frame='off'] .boardGrid {
@@ -483,13 +514,19 @@ a:hover {
 }
 
 .tile.hidden:active {
-  --tilePress: 1px;
+  --tilePress: var(--pressY);
 }
 
 .tile.revealed {
   cursor: default;
   background: var(--tileRevealedBg);
   border-color: var(--tileRevealedBorder);
+}
+
+:root[data-reveal-anim='on'] .tile.revealed:not(.mine) {
+  animation: tileRevealPop var(--animSlow) cubic-bezier(0.2, 0.75, 0.2, 1);
+  animation-delay: var(--reveal-delay, 0ms);
+  animation-fill-mode: both;
 }
 
 .tile.mine {
@@ -502,8 +539,67 @@ a:hover {
   border-color: var(--tileFlagBorder);
 }
 
+:root[data-flag-anim='on'] .tile.flagged .tileContent {
+  animation: flagPop var(--animFast) cubic-bezier(0.2, 0.75, 0.2, 1);
+}
+
 .tile:disabled {
   opacity: 0.92;
+}
+
+@keyframes tileRevealPop {
+  from {
+    opacity: 0.65;
+    transform: rotate(var(--tv-rot)) translateY(var(--tilePress)) scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: rotate(var(--tv-rot)) translateY(var(--tilePress)) scale(1);
+  }
+}
+
+@keyframes flagPop {
+  from {
+    opacity: 0.6;
+    transform: scale(0.7) rotate(-10deg);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+@keyframes winSheen {
+  0% {
+    opacity: 0;
+    transform: translateX(-120%);
+  }
+  25% {
+    opacity: 0.16;
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(120%);
+  }
+}
+
+@keyframes loseShake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-3px);
+  }
+  40% {
+    transform: translateX(3px);
+  }
+  60% {
+    transform: translateX(-2px);
+  }
+  80% {
+    transform: translateX(2px);
+  }
 }
 
 .tileContent {

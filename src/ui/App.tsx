@@ -45,6 +45,9 @@ export default function App() {
   const [tMs, setTMs] = useState(() => nowMs())
   const [customOpen, setCustomOpen] = useState(false)
   const [settingsOpen, setSettingsOpen] = useState(false)
+  const [revealOrigin, setRevealOrigin] = useState<{ x: number; y: number } | null>(
+    null,
+  )
 
   const difficultyLabel = useMemo(
     () => bestDifficultyLabel(difficulty, spec),
@@ -77,12 +80,14 @@ export default function App() {
 
       if (e.key === 'r' || e.key === 'R') {
         e.preventDefault()
+        setRevealOrigin(null)
         setGame(createNewGame({ ...spec, seed: randomSeed() }))
         return
       }
       if (e.key === '1') {
         e.preventDefault()
         const p = PRESETS.find((x) => x.id === 'beginner')!
+        setRevealOrigin(null)
         setDifficulty('beginner')
         setSpec(p.spec)
         setGame(createNewGame({ ...p.spec, seed: randomSeed() }))
@@ -91,6 +96,7 @@ export default function App() {
       if (e.key === '2') {
         e.preventDefault()
         const p = PRESETS.find((x) => x.id === 'intermediate')!
+        setRevealOrigin(null)
         setDifficulty('intermediate')
         setSpec(p.spec)
         setGame(createNewGame({ ...p.spec, seed: randomSeed() }))
@@ -99,6 +105,7 @@ export default function App() {
       if (e.key === '3') {
         e.preventDefault()
         const p = PRESETS.find((x) => x.id === 'expert')!
+        setRevealOrigin(null)
         setDifficulty('expert')
         setSpec(p.spec)
         setGame(createNewGame({ ...p.spec, seed: randomSeed() }))
@@ -113,10 +120,11 @@ export default function App() {
     setDifficulty(nextDifficulty)
     setSpec(nextSpec)
     setGame(createNewGame({ ...nextSpec, seed: randomSeed() }))
+    setRevealOrigin(null)
   }
 
   return (
-    <div className="app" data-app>
+    <div className="app" data-app data-game-status={game.status}>
       <header className="appHeader">
         <div className="appHeaderInner">
           <div className="titleRow">
@@ -148,7 +156,10 @@ export default function App() {
             timeSeconds={elapsedSeconds}
             difficultyLabel={difficultyLabel}
             status={game.status}
-            onRestart={() => setGame(createNewGame({ ...spec, seed: randomSeed() }))}
+            onRestart={() => {
+              setRevealOrigin(null)
+              setGame(createNewGame({ ...spec, seed: randomSeed() }))
+            }}
             onPreset={(id) => {
               const p = PRESETS.find((x) => x.id === id)!
               startNewGame(p.spec, id)
@@ -159,13 +170,16 @@ export default function App() {
           <Board
             game={game}
             tileSizePx={tileSizePx}
+            revealOrigin={revealOrigin}
             onReveal={(x, y) => {
+              setRevealOrigin({ x, y })
               setGame((g) => revealCell(g, x, y, nowMs()).state)
             }}
             onFlag={(x, y) => {
               setGame((g) => toggleFlag(g, x, y, nowMs()))
             }}
             onChord={(x, y) => {
+              setRevealOrigin({ x, y })
               setGame((g) => chord(g, x, y, nowMs()))
             }}
           />
@@ -220,18 +234,27 @@ export default function App() {
       <Modal
         open={game.status === 'won'}
         title="You win"
-        onClose={() => setGame(createNewGame({ ...spec, seed: randomSeed() }))}
+        onClose={() => {
+          setRevealOrigin(null)
+          setGame(createNewGame({ ...spec, seed: randomSeed() }))
+        }}
         actions={
           <>
             <button
               className="btn btnGhost"
-              onClick={() => setGame(createNewGame({ ...spec, seed: randomSeed() }))}
+              onClick={() => {
+                setRevealOrigin(null)
+                setGame(createNewGame({ ...spec, seed: randomSeed() }))
+              }}
             >
               Close
             </button>
             <button
               className="btn"
-              onClick={() => setGame(createNewGame({ ...spec, seed: randomSeed() }))}
+              onClick={() => {
+                setRevealOrigin(null)
+                setGame(createNewGame({ ...spec, seed: randomSeed() }))
+              }}
             >
               New game
             </button>
@@ -246,18 +269,27 @@ export default function App() {
       <Modal
         open={game.status === 'lost'}
         title="Boom"
-        onClose={() => setGame(createNewGame({ ...spec, seed: randomSeed() }))}
+        onClose={() => {
+          setRevealOrigin(null)
+          setGame(createNewGame({ ...spec, seed: randomSeed() }))
+        }}
         actions={
           <>
             <button
               className="btn btnGhost"
-              onClick={() => setGame(createNewGame({ ...spec, seed: randomSeed() }))}
+              onClick={() => {
+                setRevealOrigin(null)
+                setGame(createNewGame({ ...spec, seed: randomSeed() }))
+              }}
             >
               Close
             </button>
             <button
               className="btn"
-              onClick={() => setGame(createNewGame({ ...spec, seed: randomSeed() }))}
+              onClick={() => {
+                setRevealOrigin(null)
+                setGame(createNewGame({ ...spec, seed: randomSeed() }))
+              }}
             >
               Restart
             </button>

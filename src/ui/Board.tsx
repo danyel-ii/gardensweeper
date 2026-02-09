@@ -10,18 +10,32 @@ import { Tile } from './Tile'
 type BoardProps = {
   game: GameState
   tileSizePx: number
+  revealOrigin: { x: number; y: number } | null
   onReveal: (x: number, y: number) => void
   onFlag: (x: number, y: number) => void
   onChord: (x: number, y: number) => void
 }
 
-export function Board({ game, tileSizePx, onReveal, onFlag, onChord }: BoardProps) {
-  const { settings } = useSettings()
+export function Board({
+  game,
+  tileSizePx,
+  revealOrigin,
+  onReveal,
+  onFlag,
+  onChord,
+}: BoardProps) {
+  const { settings, effectiveReduceMotion } = useSettings()
   const width = game.config.width
   const height = game.config.height
   const total = width * height
   const disabled = game.status !== 'playing'
   const variation = settings.proceduralVariation
+  const waveOn =
+    settings.animationsEnabled &&
+    !effectiveReduceMotion &&
+    settings.revealAnimationEnabled &&
+    settings.floodWaveEnabled
+  const waveStepMs = Math.max(0, Math.round(12 * settings.animationIntensity))
 
   const seedU32 = useMemo(() => hashStringToU32(game.config.seed), [game.config.seed])
 
@@ -137,6 +151,13 @@ export function Board({ game, tileSizePx, onReveal, onFlag, onChord }: BoardProp
             tvBright = 1 + (u2 * 2 - 1) * (0.06 * variation)
           }
 
+          let revealDelayMs = 0
+          if (waveOn && revealOrigin && waveStepMs > 0) {
+            const dist =
+              Math.abs(x - revealOrigin.x) + Math.abs(y - revealOrigin.y)
+            revealDelayMs = Math.min(180, dist * waveStepMs)
+          }
+
           return (
             <Tile
               key={index}
@@ -152,6 +173,7 @@ export function Board({ game, tileSizePx, onReveal, onFlag, onChord }: BoardProp
               tileSizePx={tileSizePx}
               tvRotDeg={tvRotDeg}
               tvBright={tvBright}
+              revealDelayMs={revealDelayMs}
               glyphModeEnabled={settings.glyphModeEnabled}
               ariaLabel={ariaLabel}
               onFocusIndex={setFocusIndex}
