@@ -43,3 +43,4 @@ The URL encodes:
 ## Notes
 
 - Default board is 10x10 with 12 mines (matches the theme inspiration).
+- Ambient floating petals/butterflies run via p5.js (auto-disabled when `prefers-reduced-motion` is on).

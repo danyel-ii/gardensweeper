@@ -5,6 +5,7 @@ import { chord, createNewGame, revealCell, toggleFlag, type GameState } from '..
 import { indexToX, indexToY } from '../engine/grid'
 import { randomSeed } from '../utils/seed'
 import { buildUrl, parseUrlParams } from '../utils/urlState'
+import { AmbienceP5 } from './AmbienceP5'
 import { Board } from './Board'
 import { Modal } from './Modal'
 
@@ -155,7 +156,9 @@ export default function App() {
 
   return (
     <div className="app" data-game-status={game.status}>
+      <div className="liquidGlassBg" aria-hidden="true" />
       <div className="textureOverlay" aria-hidden="true" />
+      <AmbienceP5 />
 
       <div className="bgSticker stickerTL" aria-hidden="true">
         <svg viewBox="0 0 100 100" role="presentation">
@@ -367,4 +370,3 @@ export default function App() {
     </div>
   )
 }
-
