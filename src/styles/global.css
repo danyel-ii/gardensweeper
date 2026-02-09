@@ -18,6 +18,19 @@
   --surfaceInset: rgba(0, 0, 0, 0.22);
   --surfaceInset2: rgba(0, 0, 0, 0.18);
   --surfaceRevealed: rgba(0, 0, 0, 0.26);
+  --wallpaper: none;
+  --boardFrameBg: var(--surfaceInset2);
+  --boardFrameBorder: var(--lineSubtle);
+  --tileHiddenBg: var(--surfaceTile);
+  --tileHiddenHoverBg: var(--surfaceTileHover);
+  --tileRevealedBg: var(--surfaceRevealed);
+  --tileBorder: var(--line);
+  --tileBorderHover: var(--lineHover);
+  --tileRevealedBorder: var(--lineSubtle);
+  --tileFlagBg: rgba(125, 211, 252, 0.14);
+  --tileFlagBorder: rgba(125, 211, 252, 0.35);
+  --tileMineBg: rgba(220, 38, 38, 0.22);
+  --tileMineBorder: rgba(220, 38, 38, 0.5);
   --overlay: rgba(0, 0, 0, 0.62);
   --modalBg: rgba(16, 22, 32, 0.92);
   --shadowModal: 0 22px 80px rgba(0, 0, 0, 0.55);
@@ -27,11 +40,21 @@
   --animFast: 120ms;
   --animSlow: 220ms;
   --tileFontSize: 14px;
+  --n1: #60a5fa;
+  --n2: #22c55e;
+  --n3: #ef4444;
+  --n4: #a78bfa;
+  --n5: #f97316;
+  --n6: #2dd4bf;
+  --n7: #e5e7eb;
+  --n8: #94a3b8;
   --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
     'Liberation Mono', 'Courier New', monospace;
 
   color: var(--text0);
-  background: radial-gradient(1200px 800px at 20% 10%, var(--bg1), var(--bg0));
+  background-color: var(--bg0);
+  background-image: var(--wallpaper),
+    radial-gradient(1200px 800px at 20% 10%, var(--bg1), var(--bg0));
 
   font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto,
     Helvetica, Arial, 'Apple Color Emoji', 'Segoe UI Emoji';
@@ -63,6 +86,8 @@
   --labelSoft: rgba(0, 0, 0, 0.62);
   --titleSoft: rgba(0, 0, 0, 0.78);
   --dashed: rgba(0, 0, 0, 0.18);
+  --n7: #0f172a;
+  --n8: #334155;
 }
 
 :root[data-large-numbers='on'] {
@@ -295,15 +320,15 @@ a:hover {
   padding: 8px;
   width: max-content;
   border-radius: 14px;
-  background: var(--surfaceInset2);
-  border: 1px solid var(--lineSubtle);
+  background: var(--boardFrameBg);
+  border: 1px solid var(--boardFrameBorder);
 }
 
 .tile {
   appearance: none;
-  border: 1px solid var(--line);
+  border: 1px solid var(--tileBorder);
   border-radius: 8px;
-  background: var(--surfaceTile);
+  background: var(--tileHiddenBg);
   color: var(--text0);
   display: grid;
   place-items: center;
@@ -317,8 +342,8 @@ a:hover {
 }
 
 .tile.hidden:hover {
-  background: var(--surfaceTileHover);
-  border-color: var(--lineHover);
+  background: var(--tileHiddenHoverBg);
+  border-color: var(--tileBorderHover);
 }
 
 .tile.hidden:active {
@@ -327,18 +352,18 @@ a:hover {
 
 .tile.revealed {
   cursor: default;
-  background: var(--surfaceRevealed);
-  border-color: var(--lineSubtle);
+  background: var(--tileRevealedBg);
+  border-color: var(--tileRevealedBorder);
 }
 
 .tile.mine {
-  background: rgba(220, 38, 38, 0.22);
-  border-color: rgba(220, 38, 38, 0.5);
+  background: var(--tileMineBg);
+  border-color: var(--tileMineBorder);
 }
 
 .tile.flagged {
-  background: rgba(125, 211, 252, 0.14);
-  border-color: rgba(125, 211, 252, 0.35);
+  background: var(--tileFlagBg);
+  border-color: var(--tileFlagBorder);
 }
 
 .tile:disabled {
@@ -353,28 +378,28 @@ a:hover {
 }
 
 .n1 {
-  color: #60a5fa;
+  color: var(--n1);
 }
 .n2 {
-  color: #22c55e;
+  color: var(--n2);
 }
 .n3 {
-  color: #ef4444;
+  color: var(--n3);
 }
 .n4 {
-  color: #a78bfa;
+  color: var(--n4);
 }
 .n5 {
-  color: #f97316;
+  color: var(--n5);
 }
 .n6 {
-  color: #2dd4bf;
+  color: var(--n6);
 }
 .n7 {
-  color: #e5e7eb;
+  color: var(--n7);
 }
 .n8 {
-  color: #94a3b8;
+  color: var(--n8);
 }
 
 .sidePanel .panelTitle {

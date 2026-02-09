@@ -108,18 +108,18 @@ Acceptance:
 ## Milestone 4 — Theme packs (art direction as a setting)
 
 Implement at least 4 theme packs:
-- [ ] Minimal (baseline)
-- [ ] Stained Glass
-- [ ] Kintsugi Ceramic
-- [ ] Botanical Field Notes
+- [x] Minimal (baseline)
+- [x] Stained Glass
+- [x] Kintsugi Ceramic
+- [x] Botanical Field Notes
 - [ ] (Optional) Art Deco
 - [ ] (Optional) Astral
 
 Per theme:
-- [ ] Color tokens (CSS vars)
-- [ ] Tile styles (unrevealed/revealed/pressed)
-- [ ] Board frame style
-- [ ] Background style (flat/wallpaper/illustration)
+- [x] Color tokens (CSS vars)
+- [x] Tile styles (unrevealed/revealed/pressed)
+- [x] Board frame style
+- [x] Background style (flat/wallpaper/illustration)
 
 Acceptance:
 - Switching themes updates the entire visual system without breaking readability.
