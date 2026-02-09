@@ -1,4 +1,6 @@
-import { memo, type CSSProperties } from 'react'
+import { memo, type CSSProperties, type ReactNode } from 'react'
+
+import { Glyph } from './Glyph'
 
 export type TileViewModel = {
   index: number
@@ -13,6 +15,7 @@ export type TileViewModel = {
   tileSizePx: number
   tvRotDeg: number
   tvBright: number
+  glyphModeEnabled: boolean
   ariaLabel: string
   onFocusIndex: (index: number) => void
   onReveal: (x: number, y: number, opts?: { chord?: boolean }) => void
@@ -35,6 +38,7 @@ function TileImpl(props: TileViewModel) {
     tileSizePx,
     tvRotDeg,
     tvBright,
+    glyphModeEnabled,
     ariaLabel,
     onFocusIndex,
     onReveal,
@@ -43,10 +47,12 @@ function TileImpl(props: TileViewModel) {
     setRef,
   } = props
 
-  let content: string | number = ''
+  let content: ReactNode = ''
   if (revealed) {
     if (mine) content = 'X'
-    else if (adjacent > 0) content = adjacent
+    else if (adjacent > 0) {
+      content = glyphModeEnabled ? <Glyph n={adjacent} /> : adjacent
+    }
   } else if (flagged) {
     content = 'F'
   }

@@ -152,6 +152,7 @@ export function Board({ game, tileSizePx, onReveal, onFlag, onChord }: BoardProp
               tileSizePx={tileSizePx}
               tvRotDeg={tvRotDeg}
               tvBright={tvBright}
+              glyphModeEnabled={settings.glyphModeEnabled}
               ariaLabel={ariaLabel}
               onFocusIndex={setFocusIndex}
               onReveal={onReveal}

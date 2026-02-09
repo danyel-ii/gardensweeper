@@ -135,6 +135,43 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
       <div className="settingsSection">
         <h3 className="settingsH3">Numbers</h3>
         <div className="settingsRow">
+          <label className="settingsLabel">
+            Number font
+            <select
+              className="select"
+              value={settings.numberFont}
+              onChange={(e) =>
+                setSettings((s) => ({ ...s, numberFont: e.target.value }))
+              }
+            >
+              <option value="system">System (mono)</option>
+              <option value="atkinson">Atkinson Hyperlegible</option>
+              <option value="plex-mono">IBM Plex Mono</option>
+              <option value="caveat">Caveat (handwritten)</option>
+            </select>
+          </label>
+
+          <label className="settingsLabel">
+            Number style
+            <select
+              className="select"
+              value={settings.numberStyle}
+              onChange={(e) =>
+                setSettings((s) => ({
+                  ...s,
+                  numberStyle: e.target.value as typeof s.numberStyle,
+                }))
+              }
+            >
+              <option value="classic">Classic</option>
+              <option value="outlined">Outlined</option>
+              <option value="engraved">Engraved</option>
+              <option value="ink">Ink</option>
+            </select>
+          </label>
+        </div>
+
+        <div className="settingsRow">
           <label className="settingsLabel settingsToggle">
             <input
               type="checkbox"
@@ -158,6 +195,20 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
               }
             />
             High-contrast numbers
+          </label>
+
+          <label className="settingsLabel settingsToggle">
+            <input
+              type="checkbox"
+              checked={settings.glyphModeEnabled}
+              onChange={(e) =>
+                setSettings((s) => ({
+                  ...s,
+                  glyphModeEnabled: e.target.checked,
+                }))
+              }
+            />
+            Glyph mode (1–8)
           </label>
         </div>
       </div>

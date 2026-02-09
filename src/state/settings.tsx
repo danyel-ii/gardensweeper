@@ -113,6 +113,20 @@ export const DEFAULT_SETTINGS: Settings = {
   showThemePreviews: true,
 }
 
+function numberFontToFamily(id: string): string {
+  switch (id) {
+    case 'atkinson':
+      return "'Atkinson Hyperlegible', var(--mono)"
+    case 'plex-mono':
+      return "'IBM Plex Mono', var(--mono)"
+    case 'caveat':
+      return "'Caveat', var(--mono)"
+    case 'system':
+    default:
+      return 'var(--mono)'
+  }
+}
+
 function clamp01(n: unknown, fallback: number): number {
   if (typeof n !== 'number' || !Number.isFinite(n)) return fallback
   return Math.max(0, Math.min(1, n))
@@ -338,6 +352,8 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     root.dataset.grain = settings.grainEnabled ? 'on' : 'off'
     root.dataset.vignette = settings.vignetteEnabled ? 'on' : 'off'
     root.dataset.boardFrame = settings.boardFrameEnabled ? 'on' : 'off'
+    root.dataset.numberStyle = settings.numberStyle
+    root.dataset.glyphMode = settings.glyphModeEnabled ? 'on' : 'off'
 
     const needsOutline =
       settings.highContrastNumbers ||
@@ -357,6 +373,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     root.style.setProperty('--animFast', `${Math.round(120 * anim)}ms`)
     root.style.setProperty('--animSlow', `${Math.round(220 * anim)}ms`)
 
+    root.style.setProperty('--numberFontFamily', numberFontToFamily(settings.numberFont))
     root.style.setProperty('--textureIntensity', String(clamp01(settings.textureIntensity, 0.2)))
     root.style.setProperty(
       '--proceduralVariationIntensity',

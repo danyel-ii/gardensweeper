@@ -148,14 +148,14 @@ Acceptance:
 
 ## Milestone 6 — Typography, number styles, and glyph mode (all optional)
 
-- [ ] Add at least 2–3 font presets (open-license via npm packages or local assets).
-- [ ] Number style options:
+- [x] Add at least 2–3 font presets (open-license via npm packages or local assets).
+- [x] Number style options:
   - classic
   - outlined/high-contrast
   - engraved/emboss (material-aware)
   - ink/handwritten (theme-aware)
-- [ ] Large numbers toggle
-- [ ] Glyph mode:
+- [x] Large numbers toggle
+- [x] Glyph mode:
   - optional mapping of 1–8 to distinct themed glyphs
   - must remain quickly distinguishable
   - includes fallback to numerals
