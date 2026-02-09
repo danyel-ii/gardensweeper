@@ -1,0 +1,270 @@
+# Minesweeper Studio — to-do (Codex execution checklist)
+
+This file is a living backlog and progress log.
+Rules:
+- Work top-to-bottom.
+- Keep the app working after each milestone.
+- After completing a task, tick it and add a short note if needed.
+
+## Progress log (append-only)
+- [ ] (YYYY-MM-DD) Project started.
+
+---
+
+## Milestone 0 — Bootstrap & guardrails
+
+- [ ] Initialize project with Vite + React + TypeScript.
+- [ ] Add scripts: dev/build/preview/test/lint/format (as appropriate).
+- [ ] Add basic folder structure:
+  - `src/engine`, `src/state`, `src/themes`, `src/ui`, `src/styles`, `src/utils`, `src/assets`
+- [ ] Add a minimal README:
+  - how to run
+  - basic controls
+  - note that visuals are optional via Settings
+- [ ] Add ESLint + Prettier (or equivalent) and TypeScript strict mode.
+- [ ] Confirm: `npm run dev` opens a blank shell app.
+
+Acceptance:
+- Dev server runs, build passes, basic layout loads.
+
+---
+
+## Milestone 1 — Core Minesweeper engine (pure + tested)
+
+- [ ] Implement deterministic RNG utility (seed → reproducible stream).
+- [ ] Implement board data model:
+  - width, height, mineCount
+  - mines (boolean array)
+  - adjacentMineCounts (0..8 array)
+- [ ] Implement generation rules:
+  - generated only after first reveal (so first click is safe)
+  - optional stronger safety: first click + neighbors are safe
+- [ ] Implement game state model:
+  - revealed (boolean array)
+  - flagged (boolean array)
+  - status: playing/won/lost
+  - revealedCount, flagsCount, startTime, endTime
+- [ ] Implement actions (pure functions):
+  - reveal cell (with flood fill for 0)
+  - toggle flag
+  - chord (reveal neighbors when flags match number)
+  - compute win condition
+- [ ] Add Vitest tests for:
+  - determinism given seed + first click
+  - mine counts correct
+  - adjacency counts correct
+  - flood fill correctness
+  - chord correctness
+  - win/loss correctness
+
+Acceptance:
+- Tests pass; engine can be driven without UI.
+
+---
+
+## Milestone 2 — Minimal playable UI (no fancy visuals yet)
+
+- [ ] Build basic layout:
+  - top HUD: mines remaining, timer, reset button
+  - board grid
+- [ ] Implement tile interactions:
+  - left click: reveal
+  - right click/context menu: flag
+  - chord: mouse (e.g. middle click OR left+right OR keyboard modifier)
+- [ ] Add difficulties + restart:
+  - Beginner / Intermediate / Expert
+  - Custom (simple modal/form)
+- [ ] Implement timer start on first action; stop on win/loss.
+- [ ] Add basic win/lose modal.
+- [ ] Add keyboard shortcuts (initial set):
+  - R = restart
+  - 1/2/3 = difficulty presets
+  - Arrow keys move focus (optional), Enter reveal, F flag (optional)
+
+Acceptance:
+- Fully playable Minesweeper in browser.
+
+---
+
+## Milestone 3 — Settings system (foundation for all beautification)
+
+- [ ] Implement Settings store with:
+  - defaults
+  - versioning + migration
+  - localStorage persistence
+- [ ] Create Settings UI:
+  - button opens drawer/modal
+  - categories + toggles + sliders
+  - “Reset to defaults”
+- [ ] Add “Preview” area in settings for theme selection.
+- [ ] Implement `prefers-reduced-motion` + `prefers-color-scheme` integration:
+  - default settings follow system, user override allowed.
+
+Acceptance:
+- Settings persist across reload; toggles affect UI (even if only minimal changes at first).
+
+---
+
+## Milestone 4 — Theme packs (art direction as a setting)
+
+Implement at least 4 theme packs:
+- [ ] Minimal (baseline)
+- [ ] Stained Glass
+- [ ] Kintsugi Ceramic
+- [ ] Botanical Field Notes
+- [ ] (Optional) Art Deco
+- [ ] (Optional) Astral
+
+Per theme:
+- [ ] Color tokens (CSS vars)
+- [ ] Tile styles (unrevealed/revealed/pressed)
+- [ ] Board frame style
+- [ ] Background style (flat/wallpaper/illustration)
+
+Acceptance:
+- Switching themes updates the entire visual system without breaking readability.
+
+---
+
+## Milestone 5 — Patterns, textures, grain, and procedural variation (all optional)
+
+- [ ] Patterned tiles toggle:
+  - distinct patterns for unrevealed vs revealed
+  - pattern intensity respects contrast rules
+- [ ] Texture overlay toggle + intensity slider:
+  - apply subtle noise/grain overlay (generated or asset-based)
+- [ ] Procedural per-tile variation:
+  - deterministic per tile based on seed + coords
+  - used for slight background-position/rotation/brightness variation
+  - intensity slider controls strength
+- [ ] Vignette and board depth toggles:
+  - vignette overlay
+  - board shadow / raised frame
+
+Acceptance:
+- Visual richness increases, but numbers remain readable in all combos.
+
+---
+
+## Milestone 6 — Typography, number styles, and glyph mode (all optional)
+
+- [ ] Add at least 2–3 font presets (open-license via npm packages or local assets).
+- [ ] Number style options:
+  - classic
+  - outlined/high-contrast
+  - engraved/emboss (material-aware)
+  - ink/handwritten (theme-aware)
+- [ ] Large numbers toggle
+- [ ] Glyph mode:
+  - optional mapping of 1–8 to distinct themed glyphs
+  - must remain quickly distinguishable
+  - includes fallback to numerals
+
+Acceptance:
+- Numbers are always legible; glyph mode is usable and not confusing.
+
+---
+
+## Milestone 7 — Micro-animations and win/lose moments (all optional)
+
+- [ ] Press feedback animation (toggle)
+- [ ] Reveal animation (toggle)
+- [ ] Flood-fill cascade animation (toggle)
+- [ ] Flag placement animation (toggle)
+- [ ] Win moment animation (toggle)
+- [ ] Lose moment animation (toggle)
+- [ ] Reduce motion:
+  - when reduce motion is on, disable/shorten animations globally
+
+Acceptance:
+- Animations feel premium, never distracting, and never block gameplay.
+
+---
+
+## Milestone 8 — HUD styles + layout polish (optional)
+
+- [ ] Implement HUD style switcher:
+  - minimal
+  - “brass counter” style
+  - “field notes” style
+- [ ] Add a help/controls modal.
+- [ ] Add stats modal:
+  - best times per difficulty stored locally
+- [ ] Make layout responsive:
+  - works well on mobile portrait
+  - settings accessible without covering key UI
+
+Acceptance:
+- UI feels designed; not just functional.
+
+---
+
+## Milestone 9 — Cursor + interaction polish (optional)
+
+- [ ] Custom cursor sets per theme (desktop only; fallback safe).
+- [ ] Hover highlight toggle
+- [ ] Chord preview toggle (soft highlight of neighbors when holding chord gesture)
+- [ ] Touch gestures:
+  - long-press to flag
+  - optional chord gesture that is discoverable in Help
+
+Acceptance:
+- Interaction feels “crafted” across mouse and touch.
+
+---
+
+## Milestone 10 — Ambience: SFX, ambient loop, haptics (optional)
+
+- [ ] SFX toggle + volume
+- [ ] Ambient loop toggle + volume (synth or bundled audio with license)
+- [ ] Haptics toggle on supported devices (`navigator.vibrate`)
+- [ ] Mute shortcut (e.g. M)
+
+Acceptance:
+- Sound never auto-blasts; defaults are gentle; everything is user-controlled.
+
+---
+
+## Milestone 11 — Shareable seeds + URL state
+
+- [ ] Add seed field + “New seed” button.
+- [ ] Encode game params into URL:
+  - width/height/mines/seed
+  - optionally theme id (and maybe a compact settings preset)
+- [ ] Add “Copy link” button.
+- [ ] Load from URL on startup.
+
+Acceptance:
+- Two users opening the same link get the same board and visuals (as applicable).
+
+---
+
+## Milestone 12 — Final QA, accessibility, and performance
+
+- [ ] Accessibility pass:
+  - colorblind-friendly mode
+  - keyboard operable core actions
+  - focus states visible
+  - ARIA labels for controls
+- [ ] Performance pass:
+  - Tile rendering does not lag on Expert board
+  - Avoid layout thrash in animations
+- [ ] Cross-browser sanity:
+  - Chrome, Firefox, Safari basics
+- [ ] Update README with:
+  - controls
+  - settings explanations
+  - theming overview
+  - shareable links
+
+Acceptance:
+- `npm run build` succeeds, app is polished, and settings are stable.
+
+---
+
+## Nice-to-haves (only after done)
+
+- [ ] PWA offline support
+- [ ] Screenshot/export of board (SVG/PNG)
+- [ ] “Daily puzzle” mode (fixed seed per day)
+- [ ] Theme marketplace UI (still local presets)
