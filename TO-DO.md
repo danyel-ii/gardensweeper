@@ -31,25 +31,25 @@ Acceptance:
 
 ## Milestone 1 — Core Minesweeper engine (pure + tested)
 
-- [ ] Implement deterministic RNG utility (seed → reproducible stream).
-- [ ] Implement board data model:
+- [x] Implement deterministic RNG utility (seed → reproducible stream).
+- [x] Implement board data model:
   - width, height, mineCount
   - mines (boolean array)
   - adjacentMineCounts (0..8 array)
-- [ ] Implement generation rules:
+- [x] Implement generation rules:
   - generated only after first reveal (so first click is safe)
   - optional stronger safety: first click + neighbors are safe
-- [ ] Implement game state model:
+- [x] Implement game state model:
   - revealed (boolean array)
   - flagged (boolean array)
   - status: playing/won/lost
   - revealedCount, flagsCount, startTime, endTime
-- [ ] Implement actions (pure functions):
+- [x] Implement actions (pure functions):
   - reveal cell (with flood fill for 0)
   - toggle flag
   - chord (reveal neighbors when flags match number)
   - compute win condition
-- [ ] Add Vitest tests for:
+- [x] Add Vitest tests for:
   - determinism given seed + first click
   - mine counts correct
   - adjacency counts correct
