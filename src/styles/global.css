@@ -113,6 +113,34 @@ body {
   background-size: 180px 180px;
 }
 
+.confettiLayer {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 120;
+}
+
+.confettiPiece {
+  position: absolute;
+  top: -24px;
+  left: 0;
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.08);
+  will-change: transform, opacity;
+  transform: translate3d(0, 0, 0) rotate(0deg);
+  animation-name: confettiFall;
+  animation-timing-function: cubic-bezier(0.2, 0.7, 0.2, 1);
+  animation-fill-mode: both;
+}
+
+.confettiPiece:nth-child(3n) {
+  filter: saturate(1.12) brightness(1.02);
+}
+
+.confettiPiece:nth-child(5n) {
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.1);
+}
+
 .bgSticker {
   position: fixed;
   pointer-events: none;
@@ -495,6 +523,21 @@ body {
 .tileContent {
   transform: translateY(1px);
   text-shadow: 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+@keyframes confettiFall {
+  0% {
+    transform: translate3d(0, -18px, 0) rotate(0deg);
+    opacity: 0;
+  }
+  12% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate3d(var(--confetti-dx), calc(100vh + 90px), 0)
+      rotate(var(--confetti-spin));
+    opacity: 0;
+  }
 }
 
 .tile[data-num='1'] {

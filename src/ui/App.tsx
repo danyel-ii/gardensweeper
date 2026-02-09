@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import type { BoardSpec } from '../engine/board'
 import { chord, createNewGame, revealCell, toggleFlag, type GameState } from '../engine/game'
@@ -7,6 +7,7 @@ import { randomSeed } from '../utils/seed'
 import { buildUrl, parseUrlParams } from '../utils/urlState'
 import { AmbienceP5 } from './AmbienceP5'
 import { Board } from './Board'
+import { ConfettiBurst, type ConfettiPiece } from './ConfettiBurst'
 import { Modal } from './Modal'
 
 function nowMs(): number {
@@ -36,6 +37,55 @@ function computeTileSizePx(width: number): number {
 
 const DEFAULT_SPEC: BoardSpec = { width: 10, height: 10, mineCount: 12 }
 
+function clamp(n: number, lo: number, hi: number): number {
+  return Math.max(lo, Math.min(hi, n))
+}
+
+function rand(min: number, max: number): number {
+  return min + Math.random() * (max - min)
+}
+
+function pick<T>(arr: T[]): T {
+  return arr[Math.floor(Math.random() * arr.length)]!
+}
+
+function generateConfettiPieces(count: number): ConfettiPiece[] {
+  const colors = [
+    'var(--ref-pink)',
+    'var(--ref-lime)',
+    'var(--ref-papaya)',
+    'var(--ref-teal)',
+    'var(--ref-gold)',
+    'rgba(255, 255, 255, 0.95)',
+  ]
+
+  const pieces: ConfettiPiece[] = []
+  for (let i = 0; i < count; i += 1) {
+    const skinny = Math.random() < 0.55
+    const w = skinny ? rand(5, 9) : rand(7, 13)
+    const h = skinny ? rand(10, 20) : rand(8, 14)
+    const flip = Math.random() < 0.4
+    const sizeW = flip ? h : w
+    const sizeH = flip ? w : h
+    const circle = Math.random() < 0.2
+    const radius = circle ? Math.max(sizeW, sizeH) : rand(1, 4)
+
+    pieces.push({
+      xPct: rand(0, 100),
+      sizeW,
+      sizeH,
+      radius,
+      color: pick(colors),
+      opacity: rand(0.82, 1),
+      driftX: rand(-240, 240),
+      spinDeg: rand(-880, 880),
+      delayMs: rand(0, 520),
+      durationMs: rand(3000, 5200),
+    })
+  }
+  return pieces
+}
+
 export default function App() {
   const [boot] = useState(() => {
     const fromUrl = parseUrlParams(window.location.search)
@@ -61,19 +111,59 @@ export default function App() {
   const [seedDraft, setSeedDraft] = useState(() => boot.seedDraft)
   const [copied, setCopied] = useState(false)
   const [tMs, setTMs] = useState(() => nowMs())
+  const [confetti, setConfetti] = useState<ConfettiPiece[] | null>(null)
+  const confettiTimeoutRef = useRef<number | null>(null)
 
   const minesRemaining = game.config.mineCount - game.flagsCount
   const elapsedSeconds = computeElapsedSeconds(game, tMs)
   const tileSizePx = computeTileSizePx(game.config.width)
   const canCopyLink = game.generated && game.firstClickIndex != null
 
-  const beginNewGame = useCallback((nextSpec: BoardSpec, nextSeed: string) => {
-    const seed = nextSeed.trim()
-    if (seed.length === 0) return
-    setSpec(nextSpec)
-    setSeedDraft(seed)
-    setCopied(false)
-    setGame(createNewGame({ ...nextSpec, seed }))
+  const stopConfetti = useCallback(() => {
+    if (confettiTimeoutRef.current != null) {
+      window.clearTimeout(confettiTimeoutRef.current)
+      confettiTimeoutRef.current = null
+    }
+    setConfetti(null)
+  }, [])
+
+  const startConfetti = useCallback(() => {
+    if (typeof window !== 'undefined') {
+      const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+      if (reduced) return
+    }
+    stopConfetti()
+
+    const w = typeof window === 'undefined' ? 1024 : window.innerWidth
+    const h = typeof window === 'undefined' ? 768 : window.innerHeight
+    const count = Math.round(clamp((w * h) / 5200, 200, 520))
+    setConfetti(generateConfettiPieces(count))
+    confettiTimeoutRef.current = window.setTimeout(() => {
+      confettiTimeoutRef.current = null
+      setConfetti(null)
+    }, 5200)
+  }, [stopConfetti])
+
+  const beginNewGame = useCallback(
+    (nextSpec: BoardSpec, nextSeed: string) => {
+      const seed = nextSeed.trim()
+      if (seed.length === 0) return
+      stopConfetti()
+      setSpec(nextSpec)
+      setSeedDraft(seed)
+      setCopied(false)
+      setGame(createNewGame({ ...nextSpec, seed }))
+    },
+    [stopConfetti],
+  )
+
+  useEffect(() => {
+    return () => {
+      if (confettiTimeoutRef.current != null) {
+        window.clearTimeout(confettiTimeoutRef.current)
+        confettiTimeoutRef.current = null
+      }
+    }
   }, [])
 
   // Sync URL to reflect the current "challenge". Adds sx/sy only after first reveal.
@@ -137,8 +227,12 @@ export default function App() {
 
   const handleReveal = useCallback((x: number, y: number) => {
     const t = nowMs()
-    setGame((g) => revealCell(g, x, y, t).state)
-  }, [])
+    setGame((g) => {
+      const next = revealCell(g, x, y, t).state
+      if (g.status === 'playing' && next.status === 'won') startConfetti()
+      return next
+    })
+  }, [startConfetti])
 
   const handleFlag = useCallback((x: number, y: number) => {
     const t = nowMs()
@@ -147,8 +241,12 @@ export default function App() {
 
   const handleChord = useCallback((x: number, y: number) => {
     const t = nowMs()
-    setGame((g) => chord(g, x, y, t))
-  }, [])
+    setGame((g) => {
+      const next = chord(g, x, y, t)
+      if (g.status === 'playing' && next.status === 'won') startConfetti()
+      return next
+    })
+  }, [startConfetti])
 
   const difficultyLabel = useMemo(() => {
     return `${game.config.width}×${game.config.height} / ${game.config.mineCount}`
@@ -159,6 +257,7 @@ export default function App() {
       <div className="liquidGlassBg" aria-hidden="true" />
       <div className="textureOverlay" aria-hidden="true" />
       <AmbienceP5 />
+      {confetti ? <ConfettiBurst pieces={confetti} /> : null}
 
       <div className="bgSticker stickerTL" aria-hidden="true">
         <svg viewBox="0 0 100 100" role="presentation">
