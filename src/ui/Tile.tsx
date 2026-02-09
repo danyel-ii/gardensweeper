@@ -43,6 +43,22 @@ function TileImpl(props: TileViewModel) {
 
   const longPressTimerRef = useRef<number | null>(null)
   const suppressClickRef = useRef(false)
+  const longPressFiredRef = useRef(false)
+  const suppressResetTimerRef = useRef<number | null>(null)
+
+  const scheduleSuppressReset = () => {
+    if (suppressResetTimerRef.current != null) {
+      window.clearTimeout(suppressResetTimerRef.current)
+      suppressResetTimerRef.current = null
+    }
+    // If the long-press triggers a mobile context menu, some browsers won't dispatch a click.
+    // This ensures we don't suppress the next real tap.
+    suppressResetTimerRef.current = window.setTimeout(() => {
+      suppressResetTimerRef.current = null
+      suppressClickRef.current = false
+      longPressFiredRef.current = false
+    }, 900)
+  }
 
   let content: ReactNode = ''
   if (revealed) {
@@ -85,11 +101,13 @@ function TileImpl(props: TileViewModel) {
         if (e.touches.length === 2) {
           e.preventDefault()
           suppressClickRef.current = true
+          longPressFiredRef.current = true
           if (longPressTimerRef.current != null) {
             window.clearTimeout(longPressTimerRef.current)
             longPressTimerRef.current = null
           }
           onChord(x, y)
+          scheduleSuppressReset()
         }
       }}
       onPointerDown={(e) => {
@@ -97,12 +115,19 @@ function TileImpl(props: TileViewModel) {
         if (e.pointerType !== 'touch') return
         if (revealed) return
         suppressClickRef.current = false
+        longPressFiredRef.current = false
+        if (suppressResetTimerRef.current != null) {
+          window.clearTimeout(suppressResetTimerRef.current)
+          suppressResetTimerRef.current = null
+        }
         if (longPressTimerRef.current != null) {
           window.clearTimeout(longPressTimerRef.current)
         }
         longPressTimerRef.current = window.setTimeout(() => {
           suppressClickRef.current = true
+          longPressFiredRef.current = true
           onFlag(x, y)
+          scheduleSuppressReset()
         }, 450)
       }}
       onPointerUp={(e) => {
@@ -111,12 +136,19 @@ function TileImpl(props: TileViewModel) {
           window.clearTimeout(longPressTimerRef.current)
           longPressTimerRef.current = null
         }
+        if (longPressFiredRef.current) scheduleSuppressReset()
       }}
       onPointerCancel={() => {
         if (longPressTimerRef.current != null) {
           window.clearTimeout(longPressTimerRef.current)
           longPressTimerRef.current = null
         }
+        if (suppressResetTimerRef.current != null) {
+          window.clearTimeout(suppressResetTimerRef.current)
+          suppressResetTimerRef.current = null
+        }
+        suppressClickRef.current = false
+        longPressFiredRef.current = false
       }}
       onMouseDown={(e) => {
         if (e.button === 1) {
@@ -134,6 +166,12 @@ function TileImpl(props: TileViewModel) {
       }}
       onContextMenu={(e) => {
         e.preventDefault()
+        // Some mobile browsers fire `contextmenu` after long-press.
+        // If we already handled the long-press, don't double-toggle the flag.
+        if (suppressClickRef.current || longPressFiredRef.current) {
+          scheduleSuppressReset()
+          return
+        }
         onFlag(x, y)
       }}
     >
@@ -145,4 +183,3 @@ function TileImpl(props: TileViewModel) {
 }
 
 export const Tile = memo(TileImpl)
-

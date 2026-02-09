@@ -423,6 +423,8 @@ body {
   position: relative;
   cursor: pointer;
   user-select: none;
+  touch-action: manipulation;
+  -webkit-touch-callout: none;
   border-radius: 10px;
   font-family: 'Chewy', cursive;
   font-size: 22px;
@@ -569,6 +571,23 @@ body {
   width: 100%;
   display: flex;
   justify-content: center;
+}
+
+.controlsHint {
+  display: none;
+  margin-top: 6px;
+  font-size: 1.05rem;
+  color: var(--ref-seed);
+  opacity: 0.9;
+  text-align: center;
+  max-width: 44ch;
+  line-height: 1.2;
+}
+
+@media (pointer: coarse) {
+  .controlsHint {
+    display: block;
+  }
 }
 
 .resetBtn {

@@ -428,6 +428,10 @@ export default function App() {
           onChord={handleChord}
         />
 
+        <div className="controlsHint" role="note">
+          Tap to dig. Long-press to place a butterfly flag. Two-finger tap to chord.
+        </div>
+
         <div className="actionsRow">
           <button
             className="resetBtn"
