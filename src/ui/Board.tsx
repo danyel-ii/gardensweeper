@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 
 import type { GameState } from '../engine/game'
 import { indexToX, indexToY } from '../engine/grid'
@@ -22,6 +22,57 @@ export function Board({ game, tileSizePx, onReveal, onFlag, onChord }: BoardProp
 
   const seedU32 = useMemo(() => hashStringToU32(game.config.seed), [game.config.seed])
 
+  const wrapRef = useRef<HTMLDivElement | null>(null)
+  const gridRef = useRef<HTMLDivElement | null>(null)
+  const [wrapWidthPx, setWrapWidthPx] = useState<number | null>(null)
+
+  // Ensure the board always fits horizontally on mobile by shrinking tile size as needed.
+  // We observe the wrapper width (which is now `width: 100%`) so it reflects available space,
+  // not the intrinsic (shrink-to-fit) width of the grid contents.
+  useLayoutEffect(() => {
+    const el = wrapRef.current
+    if (!el) return
+
+    const update = () => {
+      const next = Math.max(0, Math.floor(el.getBoundingClientRect().width))
+      setWrapWidthPx((prev) => (prev === next ? prev : next))
+    }
+
+    update()
+
+    const ro = new ResizeObserver(() => update())
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [])
+
+  const effectiveTileSizePx = useMemo(() => {
+    if (wrapWidthPx == null) return tileSizePx
+    if (typeof window === 'undefined') return tileSizePx
+    const gridEl = gridRef.current
+    if (!gridEl) return tileSizePx
+
+    const cs = window.getComputedStyle(gridEl)
+    const gapPx =
+      Number.parseFloat(cs.columnGap || cs.gap || '0') ||
+      Number.parseFloat(cs.gap || '0') ||
+      0
+    const paddingX =
+      (Number.parseFloat(cs.paddingLeft || '0') || 0) +
+      (Number.parseFloat(cs.paddingRight || '0') || 0)
+    const borderX =
+      (Number.parseFloat(cs.borderLeftWidth || '0') || 0) +
+      (Number.parseFloat(cs.borderRightWidth || '0') || 0)
+
+    const extra = paddingX + borderX + Math.max(0, width - 1) * gapPx
+    const fit = Math.floor((wrapWidthPx - extra) / width)
+    if (!Number.isFinite(fit)) return tileSizePx
+
+    // Keep tiles big when we can, but shrink enough to avoid horizontal scrolling.
+    // Avoid going too tiny (still allow overflow for extreme board sizes).
+    const minTilePx = 14
+    return Math.min(tileSizePx, Math.max(minTilePx, fit))
+  }, [tileSizePx, width, wrapWidthPx])
+
   const [focusIndex, setFocusIndex] = useState(0)
   const tileRefs = useRef<Array<HTMLButtonElement | null>>([])
 
@@ -37,10 +88,10 @@ export function Board({ game, tileSizePx, onReveal, onFlag, onChord }: BoardProp
 
   const gridStyle = useMemo(
     () => ({
-      gridTemplateColumns: `repeat(${width}, ${tileSizePx}px)`,
-      gridTemplateRows: `repeat(${height}, ${tileSizePx}px)`,
+      gridTemplateColumns: `repeat(${width}, ${effectiveTileSizePx}px)`,
+      gridTemplateRows: `repeat(${height}, ${effectiveTileSizePx}px)`,
     }),
-    [width, height, tileSizePx],
+    [width, height, effectiveTileSizePx],
   )
 
   const moveFocus = (dx: number, dy: number) => {
@@ -54,6 +105,7 @@ export function Board({ game, tileSizePx, onReveal, onFlag, onChord }: BoardProp
   return (
     <div
       className="boardWrap"
+      ref={wrapRef}
       onKeyDown={(e) => {
         if (e.key === 'ArrowLeft') {
           e.preventDefault()
@@ -97,7 +149,13 @@ export function Board({ game, tileSizePx, onReveal, onFlag, onChord }: BoardProp
         }
       }}
     >
-      <div className="boardGrid" style={gridStyle} role="grid" aria-label="Minesweeper board">
+      <div
+        className="boardGrid"
+        ref={gridRef}
+        style={gridStyle}
+        role="grid"
+        aria-label="Minesweeper board"
+      >
         {Array.from({ length: total }, (_, index) => {
           const x = indexToX(width, index)
           const y = indexToY(width, index)
@@ -139,7 +197,7 @@ export function Board({ game, tileSizePx, onReveal, onFlag, onChord }: BoardProp
               adjacent={adjacent}
               disabled={disabled}
               tabIndex={index === focusIndex ? 0 : -1}
-              tileSizePx={tileSizePx}
+              tileSizePx={effectiveTileSizePx}
               rotDeg={rotDeg}
               ariaLabel={ariaLabel}
               onFocusIndex={setFocusIndex}
@@ -154,4 +212,3 @@ export function Board({ game, tileSizePx, onReveal, onFlag, onChord }: BoardProp
     </div>
   )
 }
-

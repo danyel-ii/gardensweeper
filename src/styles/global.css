@@ -407,6 +407,7 @@ body {
 .boardWrap {
   overflow: auto;
   max-width: 100%;
+  width: 100%;
 }
 
 .boardGrid {
@@ -417,6 +418,7 @@ body {
   border-radius: 20px;
   border: 2px dashed var(--board-border);
   width: max-content;
+  margin: 0 auto;
 }
 
 .tile {
@@ -697,13 +699,19 @@ body {
 
 @media (max-width: 560px) {
   .app {
-    padding: 18px;
+    padding: 14px;
   }
 
   .gameWrapper {
-    padding: 20px;
+    padding: 16px;
     border-radius: 28px;
     box-shadow: var(--shadow-float);
+  }
+
+  .boardGrid {
+    gap: 4px;
+    padding: 8px;
+    border-radius: 18px;
   }
 
   .gardenTitle {
