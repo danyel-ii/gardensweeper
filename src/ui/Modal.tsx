@@ -24,13 +24,18 @@ export function Modal({ open, title, children, actions, onClose }: ModalProps) {
   if (!open) return null
 
   return (
-    <div className="modalOverlay" onMouseDown={onClose}>
+    <div
+      className="modalOverlay"
+      // Use pointer events instead of mouse events so touch gestures (e.g. two-finger chord)
+      // don't immediately synthesize a mouse event that dismisses the modal the moment it opens.
+      onPointerDown={onClose}
+    >
       <div
         className="modal"
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        onMouseDown={(e) => e.stopPropagation()}
+        onPointerDown={(e) => e.stopPropagation()}
       >
         <div className="modalHeader">
           <h2 className="modalTitle" id={titleId}>
