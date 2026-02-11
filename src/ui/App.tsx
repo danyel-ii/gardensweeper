@@ -249,8 +249,8 @@ export default function App() {
   }, [startConfetti])
 
   const difficultyLabel = useMemo(() => {
-    return `${game.config.width}×${game.config.height} / ${game.config.mineCount}`
-  }, [game.config.width, game.config.height, game.config.mineCount])
+    return `${game.config.width}×${game.config.height} / ${game.config.mineCount} • Score ${game.score}`
+  }, [game.config.width, game.config.height, game.config.mineCount, game.score])
 
   return (
     <div className="app" data-game-status={game.status}>

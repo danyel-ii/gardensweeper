@@ -16,6 +16,8 @@ export type GameState = {
   flagged: Uint8Array
   revealedCount: number // non-mine cells only
   flagsCount: number
+  score: number
+  correctStreak: number
   startMs: number | null
   endMs: number | null
 }
@@ -58,6 +60,8 @@ export function createNewGame(config: GameConfig): GameState {
     flagged: new Uint8Array(total),
     revealedCount: 0,
     flagsCount: 0,
+    score: 0,
+    correctStreak: 0,
     startMs: null,
     endMs: null,
   }
@@ -104,6 +108,8 @@ function applyReveals(
   const total = state.config.width * state.config.height
   const revealed = state.revealed.slice()
   let revealedCount = state.revealedCount
+  let score = state.score
+  let actionRevealedSafeCount = 0
 
   const queue = [...startIndices]
   while (queue.length > 0) {
@@ -115,12 +121,23 @@ function applyReveals(
     // Mine hit: game over (and reveal mines for UX).
     if (state.board.mines[idx] === 1) {
       revealed[idx] = 1
-      const lost = withEndTimeIfMissing({ ...state, status: 'lost', revealed }, nowMs)
+      const lost = withEndTimeIfMissing(
+        {
+          ...state,
+          status: 'lost',
+          revealed,
+          revealedCount,
+          score: score - 20,
+          correctStreak: 0,
+        },
+        nowMs,
+      )
       return revealAllMines(lost)
     }
 
     revealed[idx] = 1
     revealedCount += 1
+    actionRevealedSafeCount += 1
 
     // Flood expansion: if this cell is 0, reveal all neighboring non-mine cells.
     if (state.board.adjacentMineCounts[idx] === 0) {
@@ -133,7 +150,14 @@ function applyReveals(
     }
   }
 
-  const next = { ...state, revealed, revealedCount }
+  let correctStreak = state.correctStreak
+  if (actionRevealedSafeCount > 0) {
+    correctStreak += 1
+    const reward = correctStreak >= 5 ? 30 : correctStreak >= 2 ? 20 : 10
+    score += reward
+  }
+
+  const next = { ...state, revealed, revealedCount, score, correctStreak }
   return checkWinAndFinalize(next, nowMs)
 }
 

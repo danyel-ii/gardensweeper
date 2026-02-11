@@ -34,6 +34,8 @@ describe('engine/game', () => {
     const next = revealCell(state, 0, 0, 123).state
     expect(next.status).toBe('won')
     expect(next.revealedCount).toBe(8)
+    expect(next.score).toBe(10)
+    expect(next.correctStreak).toBe(1)
     expect(next.revealed[8]).toBe(0)
   })
 
@@ -53,6 +55,8 @@ describe('engine/game', () => {
     state = chord(state, 1, 1, 30)
     expect(state.status).toBe('won')
     expect(state.revealedCount).toBe(8)
+    expect(state.score).toBe(30)
+    expect(state.correctStreak).toBe(2)
   })
 
   it('chord with incorrect flags can reveal a mine and lose', () => {
@@ -79,5 +83,40 @@ describe('engine/game', () => {
     expect(next.status).toBe('lost')
     expect(countOnes(next.board.mines)).toBe(1)
     expect(next.revealed[0]).toBe(1)
+  })
+
+  it('deducts 20 points on mine hit and resets streak', () => {
+    const spec = { width: 2, height: 2, mineCount: 1 }
+    const board = createBoardFromMineIndices(spec, [0])
+    const base = createNewGame({ ...spec, seed: 'ignored' })
+    const state: GameState = {
+      ...base,
+      generated: true,
+      board,
+      firstClickIndex: 3,
+      score: 70,
+      correctStreak: 4,
+    }
+
+    const next = revealCell(state, 0, 0, 1).state
+    expect(next.status).toBe('lost')
+    expect(next.score).toBe(50)
+    expect(next.correctStreak).toBe(0)
+  })
+
+  it('applies 10 / 20 / 30 rewards based on consecutive correct reveals', () => {
+    const spec = { width: 3, height: 3, mineCount: 4 }
+    const board = createBoardFromMineIndices(spec, [0, 2, 6, 8])
+    const base = createNewGame({ ...spec, seed: 'ignored' })
+    let state: GameState = { ...base, generated: true, board, firstClickIndex: 4 }
+
+    state = revealCell(state, 1, 1, 10).state // streak 1 => +10
+    state = revealCell(state, 1, 0, 20).state // streak 2 => +20
+    state = revealCell(state, 0, 1, 30).state // streak 3 => +20
+    state = revealCell(state, 2, 1, 40).state // streak 4 => +20
+    state = revealCell(state, 1, 2, 50).state // streak 5 => +30
+
+    expect(state.score).toBe(100)
+    expect(state.correctStreak).toBe(5)
   })
 })
